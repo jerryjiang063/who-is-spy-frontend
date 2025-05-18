@@ -11,12 +11,12 @@ export default function WordListEditor({ current, onSelectList }) {
 
   // 获取所有列表名
   const fetchLists = async () => {
-    const res = await axios.get('http://localhost:3001/wordlists')
+    const res = await axios.get('/wordlists')
     setLists(res.data)
   }
   // 获取当前选中列表的词条
   const fetchItems = async name => {
-    const res = await axios.get(`http://localhost:3001/wordlists/${name}`)
+    const res = await axios.get(`/wordlists/${name}`)
     setItems(res.data)
   }
 
@@ -33,14 +33,14 @@ export default function WordListEditor({ current, onSelectList }) {
   // 创建列表
   const createList = async () => {
     if (!newList.trim()) return
-    await axios.post('http://localhost:3001/wordlists', { name: newList.trim() })
+    await axios.post('/wordlists', { name: newList.trim() })
     setNewList('')
     fetchLists()
   }
 
   // 删除列表
   const deleteList = async name => {
-    await axios.delete(`http://localhost:3001/wordlists/${name}`)
+    await axios.delete(`/wordlists/${name}`)
     onSelectList('default')  // 退回默认
     fetchLists()
   }
@@ -48,14 +48,14 @@ export default function WordListEditor({ current, onSelectList }) {
   // 添加词条
   const addItem = async () => {
     if (!newItem.trim()) return
-    await axios.post(`http://localhost:3001/wordlists/${current}/items`, { item: newItem.trim() })
+    await axios.post(`/wordlists/${current}/items`, { item: newItem.trim() })
     setNewItem('')
     fetchItems(current)
   }
 
   // 删除词条
   const delItem = async item => {
-    await axios.delete(`http://localhost:3001/wordlists/${current}/items`, { params: { item } })
+    await axios.delete(`/wordlists/${current}/items`, { params: { item } })
     fetchItems(current)
   }
 
