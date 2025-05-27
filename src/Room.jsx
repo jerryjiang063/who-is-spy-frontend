@@ -97,12 +97,16 @@ export default function Room() {
                 <li key={p.id}>{p.name}</li>
               ))}
             </ul>
+            <div className="text-xs text-sky-400 mt-2">
+              {room.host ? `房主：${room.players.find(p=>p.id===room.host)?.name || room.host}` : '请先创建或加入房间'}
+            </div>
           </div>
           {isHost && (
             <div className="space-y-3 w-full">
               <button 
                 className="w-full text-base py-2"
                 onClick={startGame}
+                disabled={!isHost}
               >
                 开始游戏
               </button>
@@ -113,6 +117,9 @@ export default function Room() {
                 {visible ? '隐藏身份' : '显示身份'}
               </button>
             </div>
+          )}
+          {!isHost && room.host && (
+            <div className="w-full text-xs text-red-400 text-center mt-2">只有房主可以开始游戏</div>
           )}
         </div>
       )}

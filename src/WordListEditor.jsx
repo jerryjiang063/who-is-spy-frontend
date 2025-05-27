@@ -56,7 +56,7 @@ export default function WordListEditor({ current, onSelectList, onBack }) {
             value={newList}
             onChange={e => setNewList(e.target.value)}
           />
-          <button className="w-full" onClick={createList}>创建</button>
+          <button className="w-full text-xs py-0.5 px-1" onClick={createList}>创建</button>
         </div>
         <div className="flex gap-2 w-full">
           <select
@@ -69,7 +69,7 @@ export default function WordListEditor({ current, onSelectList, onBack }) {
               <option key={l} value={l}>{l}</option>
             ))}
           </select>
-          <button className="w-full" onClick={() => deleteList(current)} disabled={!current || current === 'default'}>删除</button>
+          <button className="w-full text-xs py-0.5 px-1" onClick={() => deleteList(current)} disabled={!current || current === 'default'}>删除</button>
         </div>
         {current && (
           <div className="w-full">
@@ -85,7 +85,7 @@ export default function WordListEditor({ current, onSelectList, onBack }) {
                       {items.map(i => (
                         <div key={i} className="flex justify-between items-center p-2 hover:bg-sky-50">
                           <span className="font-bold text-sky-500">{i}</span>
-                          <button className="w-auto text-red-400 hover:text-red-600 text-base px-2 py-1" onClick={() => delItem(i)}>删除</button>
+                          <button className="w-auto text-red-400 hover:text-red-600 text-xs px-1 py-0.5" onClick={() => delItem(i)}>删除</button>
                         </div>
                       ))}
                     </div>
@@ -100,13 +100,13 @@ export default function WordListEditor({ current, onSelectList, onBack }) {
                     value={newItem}
                     onChange={e => setNewItem(e.target.value)}
                   />
-                  <button className="w-auto" onClick={addItem}>添加</button>
+                  <button className="w-auto text-xs py-0.5 px-1" onClick={addItem}>添加</button>
                 </div>
               </div>
             )}
           </div>
         )}
-        <button className="w-full text-base py-2 mt-2" onClick={onBack}>返回</button>
+        <button className="w-full text-xs py-0.5 px-1 mt-2" onClick={onBack}>返回</button>
       </div>
     </div>
   )
