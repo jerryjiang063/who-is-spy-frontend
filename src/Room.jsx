@@ -71,18 +71,16 @@ export default function Room() {
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   return (
-    <div className="w-full py-8">
+    <div className="page-center">
       {phase === 'lobby' && (
-        <div className="card animate-fade-in max-w-md mx-auto">
+        <div className="card-center animate-fade-in">
           <h2 className="title">
-            <UserGroupIcon className="icon-md" />
+            <UserGroupIcon className="icon-xs" />
             在线《谁是卧底》
           </h2>
-          
           <WordListEditor current={room.listName} onSelectList={changeList}/>
-          
-          <div className="space-y-4 mt-4 px-6 pb-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 w-full">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <input
                 className="input text-center"
                 placeholder="房间ID"
@@ -96,61 +94,58 @@ export default function Room() {
                 onChange={e=>setName(e.target.value)}
               />
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <button 
-                className="btn btn-primary btn-lg flex items-center justify-center gap-1.5"
+                className="btn btn-primary btn-lg flex items-center justify-center gap-2 w-full"
                 onClick={createRoom}
               >
-                <UserPlusIcon className="icon-sm" />
+                <UserPlusIcon className="icon-xs" />
                 创建房间
               </button>
               <button 
-                className="btn btn-secondary btn-lg flex items-center justify-center gap-1.5"
+                className="btn btn-secondary btn-lg flex items-center justify-center gap-2 w-full"
                 onClick={joinRoom}
               >
-                <UserIcon className="icon-sm" />
+                <UserIcon className="icon-xs" />
                 加入房间
               </button>
             </div>
-
             {isHost && (
-              <div className="space-y-3">
+              <div className="space-y-3 w-full">
                 <button 
-                  className="btn btn-primary w-full btn-lg flex items-center justify-center gap-1.5"
+                  className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
                   onClick={startGame}
                 >
-                  <PlayIcon className="icon-sm" />
+                  <PlayIcon className="icon-xs" />
                   开始游戏
                 </button>
                 <button 
-                  className="btn btn-secondary w-full btn-lg flex items-center justify-center gap-1.5"
+                  className="btn btn-secondary w-full btn-lg flex items-center justify-center gap-2"
                   onClick={toggleVis}
                 >
                   {visible ? (
                     <>
-                      <EyeSlashIcon className="icon-sm" />
+                      <EyeSlashIcon className="icon-xs" />
                       隐藏身份
                     </>
                   ) : (
                     <>
-                      <EyeIcon className="icon-sm" />
+                      <EyeIcon className="icon-xs" />
                       显示身份
                     </>
                   )}
                 </button>
               </div>
             )}
-
-            <div className="mt-6">
-              <h3 className="text-base font-medium mb-3 text-center">玩家列表</h3>
+            <div className="mt-6 w-full">
+              <h3 className="text-lg font-medium mb-3 text-center">玩家列表</h3>
               <div className="space-y-2">
                 {room.players.map(p=>(
                   <div 
                     key={p.id}
-                    className="flex items-center justify-center gap-1.5 p-2 rounded-md bg-secondary/50"
+                    className="flex items-center justify-center gap-2 p-2 rounded-md bg-secondary/50"
                   >
-                    <UserIcon className="icon-sm text-primary" />
+                    <UserIcon className="icon-xs text-primary" />
                     <span>{p.name}</span>
                     <span className="text-sm text-muted-foreground">
                       ({p.id.slice(-4)})
@@ -162,13 +157,12 @@ export default function Room() {
           </div>
         </div>
       )}
-
       {phase === 'playing' && (
-        <div className="animate-fade-in max-w-md mx-auto">
+        <div className="card-center animate-fade-in">
           <Game word={myWord} role={myRole} visible={visible}/>
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center w-full">
             <button
-              className="btn btn-primary btn-lg inline-flex items-center justify-center gap-1.5"
+              className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2 w-full"
               onClick={()=>setPhase('voting')}
             >
               开始投票
@@ -176,18 +170,16 @@ export default function Room() {
           </div>
         </div>
       )}
-
       {phase === 'voting' && (
-        <div className="animate-fade-in max-w-md mx-auto">
+        <div className="card-center animate-fade-in">
           <Vote roomId={roomId} players={room.players}/>
         </div>
       )}
-
       {phase === 'eliminated' && (
-        <div className="card animate-fade-in max-w-md mx-auto">
-          <h2 className="title text-destructive">你已被淘汰</h2>
-          <div className="px-6 pb-6">
-            <h3 className="text-lg font-medium mb-4 text-center">本轮角色 & 词语</h3>
+        <div className="card-center animate-fade-in">
+          <h2 className="title text-destructive"><span>你已被淘汰</span></h2>
+          <div className="w-full">
+            <h3 className="text-xl font-medium mb-4 text-center">本轮角色 & 词语</h3>
             <div className="space-y-2 mb-6">
               {summary && Object.entries(summary).map(([pid,{word,role}])=>(
                 <div 
@@ -204,25 +196,24 @@ export default function Room() {
               ))}
             </div>
             <button
-              className="btn btn-primary w-full btn-lg flex items-center justify-center gap-1.5"
+              className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
               onClick={resetGame}
             >
-              <HomeIcon className="icon-sm" />
+              <HomeIcon className="icon-xs" />
               返回大厅
             </button>
           </div>
         </div>
       )}
-
       {phase === 'finished' && (
-        <div className="card animate-fade-in max-w-md mx-auto">
+        <div className="card-center animate-fade-in">
           <h1 className="title">游戏结束 🎉</h1>
-          <div className="px-6 pb-6">
+          <div className="w-full">
             <button
-              className="btn btn-primary btn-lg flex items-center justify-center gap-1.5"
+              className="btn btn-primary btn-lg flex items-center justify-center gap-2 w-full"
               onClick={resetGame}
             >
-              <HomeIcon className="icon-sm" />
+              <HomeIcon className="icon-xs" />
               返回大厅
             </button>
           </div>

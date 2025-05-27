@@ -68,56 +68,51 @@ export default function WordListEditor({ current, onSelectList }) {
   }
 
   return (
-    <div className="mb-6 card animate-fade-in">
-      <div className="p-6 space-y-4">
-        <h3 className="text-xl font-medium flex items-center gap-2">
-          <BookOpenIcon className="h-6 w-6 text-primary" />
-          词库管理
-        </h3>
-
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <input
-              className="input flex-1"
-              placeholder="新建词库名称"
-              value={newList}
-              onChange={e => setNewList(e.target.value)}
-            />
-            <button 
-              className="btn btn-primary flex items-center gap-2" 
-              onClick={createList}
-            >
-              <PlusIcon className="h-5 w-5" />
-              创建
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            <select
-              className="input flex-1"
-              value={current}
-              onChange={e => onSelectList(e.target.value)}
-            >
-              <option value="">请选择词库</option>
-              {lists.map(l => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-            <button
-              className="btn btn-destructive flex items-center gap-2"
-              onClick={() => deleteList(current)}
-            >
-              <TrashIcon className="h-5 w-5" />
-              删除
-            </button>
-          </div>
+    <div className="card-center animate-fade-in mb-6">
+      <h3 className="title">
+        <BookOpenIcon className="icon-xs" />
+        词库管理
+      </h3>
+      <div className="space-y-4 w-full">
+        <div className="flex gap-2 w-full">
+          <input
+            className="input flex-1 text-center"
+            placeholder="新建词库名称"
+            value={newList}
+            onChange={e => setNewList(e.target.value)}
+          />
+          <button 
+            className="btn btn-primary flex items-center gap-2" 
+            onClick={createList}
+          >
+            <PlusIcon className="icon-xs" />
+            创建
+          </button>
         </div>
-
+        <div className="flex gap-2 w-full">
+          <select
+            className="input flex-1 text-center"
+            value={current}
+            onChange={e => onSelectList(e.target.value)}
+          >
+            <option value="">请选择词库</option>
+            {lists.map(l => (
+              <option key={l} value={l}>{l}</option>
+            ))}
+          </select>
+          <button
+            className="btn btn-destructive flex items-center gap-2"
+            onClick={() => deleteList(current)}
+          >
+            <TrashIcon className="icon-xs" />
+            删除
+          </button>
+        </div>
         {current && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
+          <div className="space-y-4 w-full">
+            <div className="flex justify-between items-center w-full">
               <h4 className="text-lg font-medium flex items-center gap-2">
-                <FolderIcon className="h-5 w-5 text-primary" />
+                <FolderIcon className="icon-xs text-primary" />
                 词条列表：{current}
               </h4>
               <button
@@ -126,21 +121,20 @@ export default function WordListEditor({ current, onSelectList }) {
               >
                 {showItems ? (
                   <>
-                    <ChevronUpIcon className="h-4 w-4" />
+                    <ChevronUpIcon className="icon-xs" />
                     收起
                   </>
                 ) : (
                   <>
-                    <ChevronDownIcon className="h-4 w-4" />
+                    <ChevronDownIcon className="icon-xs" />
                     展开
                   </>
                 )}
               </button>
             </div>
-
             {showItems && (
-              <div className="space-y-4 animate-slide-down">
-                <div className="max-h-48 overflow-auto rounded-md border bg-secondary/20">
+              <div className="space-y-4 animate-slide-down w-full">
+                <div className="max-h-48 overflow-auto rounded-md border bg-secondary/20 w-full">
                   {items.length > 0 ? (
                     <div className="divide-y">
                       {items.map(i => (
@@ -150,7 +144,7 @@ export default function WordListEditor({ current, onSelectList }) {
                             className="text-destructive hover:text-destructive/70 p-1 rounded-full hover:bg-destructive/10 transition-colors"
                             onClick={() => delItem(i)}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <TrashIcon className="icon-xs" />
                           </button>
                         </div>
                       ))}
@@ -161,10 +155,9 @@ export default function WordListEditor({ current, onSelectList }) {
                     </div>
                   )}
                 </div>
-                
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full">
                   <input
-                    className="input flex-1"
+                    className="input flex-1 text-center"
                     placeholder="格式：平民词,卧底词"
                     value={newItem}
                     onChange={e => setNewItem(e.target.value)}
@@ -173,7 +166,7 @@ export default function WordListEditor({ current, onSelectList }) {
                     className="btn btn-primary flex items-center gap-2" 
                     onClick={addItem}
                   >
-                    <PlusIcon className="h-5 w-5" />
+                    <PlusIcon className="icon-xs" />
                     添加
                   </button>
                 </div>
