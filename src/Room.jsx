@@ -17,9 +17,9 @@ export default function Room() {
   const [summary, setSummary]  = useState(null);
   const [wordListName, setWordListName] = useState('default');
   const [showWordListEditor, setShowWordListEditor] = useState(false);
+  const [isHost, setIsHost] = useState(false);
 
   const spyCount = 1;
-  const isHost  = socket.id === room.host;
 
   useEffect(()=>{
     socket.on('room-updated', data=>{
@@ -58,6 +58,17 @@ export default function Room() {
     return ()=>socket.off();
   },[]);
 
+  useEffect(() => {
+    function updateIsHost() {
+      setIsHost(socket.id && room.host && socket.id === room.host);
+    }
+    updateIsHost();
+    socket.on('connect', updateIsHost);
+    return () => {
+      socket.off('connect', updateIsHost);
+    };
+  }, [room.host]);
+
   const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
   const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
   const changeList    = ln=>socket.emit('change-list',{ roomId,listName:ln });
@@ -75,18 +86,18 @@ export default function Room() {
       <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
       {phase === 'lobby' && !showWordListEditor && (
         <div className="flex flex-col gap-4 w-full max-w-xl items-center">
-          <input
+            <input
             className="w-full text-base py-2 px-4"
             placeholder="房间号"
             value={roomId}
             onChange={e => setRoomId(e.target.value)}
-          />
-          <input
+            />
+            <input
             className="w-full text-base py-2 px-4"
             placeholder="昵称"
             value={name}
             onChange={e => setName(e.target.value)}
-          />
+            />
           <button className="w-full text-base py-2" onClick={createRoom}>创建房间</button>
           <button className="w-full text-base py-2" onClick={joinRoom}>加入房间</button>
           <button className="w-full text-base py-2" onClick={()=>setShowWordListEditor(true)}>词库编辑</button>
@@ -99,7 +110,7 @@ export default function Room() {
             </ul>
             <div className="text-xs text-sky-400 mt-2">
               {room.host ? `房主：${room.players.find(p=>p.id===room.host)?.name || room.host}` : '请先创建或加入房间'}
-            </div>
+          </div>
           </div>
           {isHost && (
             <div className="space-y-3 w-full">
@@ -141,7 +152,7 @@ export default function Room() {
       )}
       {phase === 'voting' && (
         <div className="w-full">
-          <Vote roomId={roomId} players={room.players}/>
+        <Vote roomId={roomId} players={room.players}/>
         </div>
       )}
       {phase === 'eliminated' && (
@@ -150,7 +161,7 @@ export default function Room() {
           <div className="w-full text-center">
             <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
             <div className="space-y-2 mb-6">
-              {summary && Object.entries(summary).map(([pid,{word,role}])=>(
+            {summary && Object.entries(summary).map(([pid,{word,role}])=>(
                 <div 
                   key={pid}
                   className={`p-3 rounded-md text-center ${
@@ -162,14 +173,14 @@ export default function Room() {
                   </span>
                   <span className="text-center">{' '}{word} — {room.players.find(p=>p.id===pid)?.name}</span>
                 </div>
-              ))}
+            ))}
             </div>
-            <button
+          <button
               className="w-full text-base py-2"
-              onClick={resetGame}
-            >
-              返回大厅
-            </button>
+            onClick={resetGame}
+          >
+            返回大厅
+          </button>
           </div>
         </div>
       )}
@@ -177,12 +188,12 @@ export default function Room() {
         <div className="w-full">
           <h1 className="title text-center">游戏结束 🎉</h1>
           <div className="w-full text-center">
-            <button
+          <button
               className="w-full text-base py-2"
-              onClick={resetGame}
-            >
-              返回大厅
-            </button>
+            onClick={resetGame}
+          >
+            返回大厅
+          </button>
           </div>
         </div>
       )}

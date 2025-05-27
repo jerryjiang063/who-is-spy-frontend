@@ -28,7 +28,7 @@ export default function Vote({ roomId, players }) {
           className={`w-full ${target === 'abstain' ? 'bg-sky-100 ring-2 ring-sky-300' : 'bg-white/40 hover:bg-sky-50'}`}
           onClick={() => setTarget('abstain')}
         >
-          弃权
+            弃权
         </button>
       </div>
       <button
