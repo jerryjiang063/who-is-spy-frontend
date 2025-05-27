@@ -99,6 +99,7 @@ export default function Room({ socket }) {
   const changeList    = ln=>socket.emit('change-list',{ roomId,listName:ln });
   const resetGame     = ()=>{ setPhase('lobby'); socket.emit('reset-game',{ roomId }); };
   const startGame     = ()=>{
+    console.log('startGame called', { roomId, isHost, players: room.players });
     if (!roomId) {
       alert('房间号不能为空！');
       return;
