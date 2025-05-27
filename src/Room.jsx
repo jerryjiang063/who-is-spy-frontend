@@ -4,6 +4,7 @@ import socket from './socket';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
 import Vote from './Vote';
+import './index.css';
 
 export default function Room() {
   const [roomId,  setRoomId]   = useState('');
@@ -62,8 +63,33 @@ export default function Room() {
   const startGame     = ()=>{ setSummary(null); socket.emit('start-game',{ roomId,spyCount }); };
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
+  useEffect(() => {
+    document.body.style.background = '#EBEFF5';
+    return () => { document.body.style.background = '#B3E5FC'; };
+  }, []);
+
   return (
-    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center relative">
+      <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
+      <div className="flex flex-col gap-6 w-full max-w-xl items-center">
+        <input
+          className="w-full"
+          placeholder="房间号"
+          value={roomId}
+          onChange={e => setRoomId(e.target.value)}
+        />
+        <input
+          className="w-full"
+          placeholder="昵称"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+        <button className="w-full" onClick={createRoom}>创建房间</button>
+        <button className="w-full" onClick={joinRoom}>加入房间</button>
+      </div>
+      <div className="absolute bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none">
+        By 姜姜大当家 | 谁是卧底在线版 | 2025
+      </div>
       <h2 className="text-4xl mb-6">房间号：{roomId}</h2>
       <div className="mb-8">
         <div className="text-2xl font-bold mb-2">玩家列表：</div>
@@ -79,33 +105,17 @@ export default function Room() {
           <div className="grid grid-cols-2 gap-4 w-full">
             <button 
               className="btn btn-primary btn-lg justify-center w-full text-center"
-              onClick={createRoom}
+              onClick={startGame}
             >
-              <AiOutlinePlus className="mr-2 text-2xl" /> 创建房间
+              <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
             </button>
             <button 
               className="btn btn-secondary btn-lg justify-center w-full text-center"
-              onClick={joinRoom}
+              onClick={toggleVis}
             >
-              <AiOutlineUser className="mr-2 text-2xl" /> 加入房间
+              {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
             </button>
           </div>
-          {isHost && (
-            <div className="space-y-3 w-full">
-              <button 
-                className="btn btn-primary w-full btn-lg justify-center text-center"
-                onClick={startGame}
-              >
-                <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
-              </button>
-              <button 
-                className="btn btn-secondary w-full btn-lg justify-center text-center"
-                onClick={toggleVis}
-              >
-                {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
-              </button>
-            </div>
-          )}
         </div>
       )}
       {phase === 'playing' && (
