@@ -1,6 +1,14 @@
 // src/WordListEditor.jsx
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { 
+  PlusIcon, 
+  TrashIcon, 
+  ChevronUpIcon, 
+  ChevronDownIcon,
+  BookOpenIcon,
+  FolderIcon
+} from '@heroicons/react/24/outline'
 
 export default function WordListEditor({ current, onSelectList }) {
   const [lists, setLists] = useState([])
@@ -60,80 +68,120 @@ export default function WordListEditor({ current, onSelectList }) {
   }
 
   return (
-    <div className="mb-6 p-4 bg-gray-50 rounded shadow">
-      <h3 className="font-medium mb-2">词库管理</h3>
+    <div className="mb-6 card animate-fade-in">
+      <div className="p-6 space-y-4">
+        <h3 className="text-xl font-medium flex items-center gap-2">
+          <BookOpenIcon className="h-6 w-6 text-primary" />
+          词库管理
+        </h3>
 
-      <div className="flex items-center mb-2">
-        <input
-          className="border p-1 mr-2"
-          placeholder="新建词库名称"
-          value={newList}
-          onChange={e => setNewList(e.target.value)}
-        />
-        <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={createList}>
-          创建
-        </button>
-      </div>
-
-      <div className="flex items-center mb-2">
-        <select
-          className="border p-1 mr-2 flex-1"
-          value={current}
-          onChange={e => onSelectList(e.target.value)}
-        >
-          <option value="">请选择词库</option>
-          {lists.map(l => (
-            <option key={l} value={l}>{l}</option>
-          ))}
-        </select>
-        <button
-          className="bg-red-500 text-white px-2 py-1 rounded"
-          onClick={() => deleteList(current)}
-        >
-          删除
-        </button>
-      </div>
-
-      {current && (
-        <>
-          <div className="flex justify-between items-center mb-1">
-            <h4 className="mb-1 font-medium">词条列表：{current}</h4>
-            <button
-              className="text-sm text-blue-500 underline"
-              onClick={() => setShowItems(!showItems)}
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <input
+              className="input flex-1"
+              placeholder="新建词库名称"
+              value={newList}
+              onChange={e => setNewList(e.target.value)}
+            />
+            <button 
+              className="btn btn-primary flex items-center gap-2" 
+              onClick={createList}
             >
-              {showItems ? '收起' : '展开'}
+              <PlusIcon className="h-5 w-5" />
+              创建
             </button>
           </div>
 
-          {showItems && (
-            <>
-              <ul className="list-disc pl-5 mb-3 max-h-40 overflow-auto">
-                {items.map(i => (
-                  <li key={i} className="flex justify-between items-center">
-                    <span>{i}</span>
-                    <button
-                      className="text-red-500 text-sm"
-                      onClick={() => delItem(i)}
-                    >删除</button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex items-center">
-                <input
-                  className="border p-1 mr-2 flex-1"
-                  placeholder="格式：平民词,卧底词"
-                  value={newItem}
-                  onChange={e => setNewItem(e.target.value)}
-                />
-                <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={addItem}>
-                  添加
-                </button>
+          <div className="flex gap-2">
+            <select
+              className="input flex-1"
+              value={current}
+              onChange={e => onSelectList(e.target.value)}
+            >
+              <option value="">请选择词库</option>
+              {lists.map(l => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+            <button
+              className="btn btn-destructive flex items-center gap-2"
+              onClick={() => deleteList(current)}
+            >
+              <TrashIcon className="h-5 w-5" />
+              删除
+            </button>
+          </div>
+        </div>
+
+        {current && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-medium flex items-center gap-2">
+                <FolderIcon className="h-5 w-5 text-primary" />
+                词条列表：{current}
+              </h4>
+              <button
+                className="btn btn-secondary btn-sm flex items-center gap-1"
+                onClick={() => setShowItems(!showItems)}
+              >
+                {showItems ? (
+                  <>
+                    <ChevronUpIcon className="h-4 w-4" />
+                    收起
+                  </>
+                ) : (
+                  <>
+                    <ChevronDownIcon className="h-4 w-4" />
+                    展开
+                  </>
+                )}
+              </button>
+            </div>
+
+            {showItems && (
+              <div className="space-y-4 animate-slide-down">
+                <div className="max-h-48 overflow-auto rounded-md border bg-secondary/20">
+                  {items.length > 0 ? (
+                    <div className="divide-y">
+                      {items.map(i => (
+                        <div key={i} className="flex justify-between items-center p-2 hover:bg-secondary/30">
+                          <span>{i}</span>
+                          <button
+                            className="text-destructive hover:text-destructive/70 p-1 rounded-full hover:bg-destructive/10 transition-colors"
+                            onClick={() => delItem(i)}
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-muted-foreground">
+                      暂无词条
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <input
+                    className="input flex-1"
+                    placeholder="格式：平民词,卧底词"
+                    value={newItem}
+                    onChange={e => setNewItem(e.target.value)}
+                  />
+                  <button 
+                    className="btn btn-primary flex items-center gap-2" 
+                    onClick={addItem}
+                  >
+                    <PlusIcon className="h-5 w-5" />
+                    添加
+                  </button>
+                </div>
               </div>
-            </>
-          )}
-        </>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

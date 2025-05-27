@@ -1,4 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  UserGroupIcon, 
+  UserPlusIcon, 
+  PlayIcon, 
+  EyeIcon, 
+  EyeSlashIcon,
+  HomeIcon,
+  UserIcon
+} from '@heroicons/react/24/outline';
 import socket from './socket';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
@@ -62,95 +71,155 @@ export default function Room() {
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
+    <div className="min-h-screen bg-background py-10 transition-colors duration-300">
       {phase === 'lobby' && (
-        <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
-          <h2 className="text-xl mb-4">在线《谁是卧底》</h2>
+        <div className="max-w-md mx-auto p-8 card animate-fade-in">
+          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+            <UserGroupIcon className="h-8 w-8 text-primary" />
+            在线《谁是卧底》
+          </h2>
+          
           <WordListEditor current={room.listName} onSelectList={changeList}/>
-          <div className="flex mb-4">
-            <input
-              className="flex-1 border p-2 mr-2"
-              placeholder="房间ID" value={roomId}
-              onChange={e=>setRoomId(e.target.value)}
-            />
-            <input
-              className="flex-1 border p-2"
-              placeholder="昵称" value={name}
-              onChange={e=>setName(e.target.value)}
-            />
-          </div>
-          <div className="flex mb-4">
-            <button className="flex-1 bg-blue-500 text-white p-2 mr-2" onClick={createRoom}>
-              创建房间
-            </button>
-            <button className="flex-1 bg-green-500 text-white p-2" onClick={joinRoom}>
-              加入房间
-            </button>
-          </div>
-          {isHost && (
-            <>
-              <button className="w-full bg-red-500 text-white p-2 mb-2" onClick={startGame}>
-                开始游戏
+          
+          <div className="space-y-4 mt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                className="input"
+                placeholder="房间ID"
+                value={roomId}
+                onChange={e=>setRoomId(e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="昵称"
+                value={name}
+                onChange={e=>setName(e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                className="btn btn-primary btn-lg flex items-center justify-center gap-2"
+                onClick={createRoom}
+              >
+                <UserPlusIcon className="h-5 w-5" />
+                创建房间
               </button>
-              <button className="w-full bg-yellow-500 text-white p-2" onClick={toggleVis}>
-                {visible ? '隐藏身份' : '显示身份'}
+              <button 
+                className="btn btn-secondary btn-lg flex items-center justify-center gap-2"
+                onClick={joinRoom}
+              >
+                <UserIcon className="h-5 w-5" />
+                加入房间
               </button>
-            </>
-          )}
-          <h3 className="font-medium mt-4">玩家列表：</h3>
-          <ul className="list-disc pl-5">
-            {room.players.map(p=>(
-              <li key={p.id}>{p.name} ({p.id.slice(-4)})</li>
-            ))}
-          </ul>
+            </div>
+
+            {isHost && (
+              <div className="space-y-3">
+                <button 
+                  className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
+                  onClick={startGame}
+                >
+                  <PlayIcon className="h-5 w-5" />
+                  开始游戏
+                </button>
+                <button 
+                  className="btn btn-secondary w-full btn-lg flex items-center justify-center gap-2"
+                  onClick={toggleVis}
+                >
+                  {visible ? (
+                    <>
+                      <EyeSlashIcon className="h-5 w-5" />
+                      隐藏身份
+                    </>
+                  ) : (
+                    <>
+                      <EyeIcon className="h-5 w-5" />
+                      显示身份
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-3">玩家列表：</h3>
+              <div className="space-y-2">
+                {room.players.map(p=>(
+                  <div 
+                    key={p.id}
+                    className="flex items-center gap-2 p-2 rounded-md bg-secondary/50"
+                  >
+                    <UserIcon className="h-5 w-5 text-primary" />
+                    <span>{p.name}</span>
+                    <span className="text-sm text-muted-foreground ml-auto">
+                      {p.id.slice(-4)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {phase === 'playing' && (
-        <>
+        <div className="animate-fade-in">
           <Game word={myWord} role={myRole} visible={visible}/>
-          <div className="max-w-md mx-auto mt-4 text-center">
+          <div className="max-w-md mx-auto mt-6 text-center">
             <button
-              className="bg-purple-500 text-white px-4 py-2 rounded"
+              className="btn btn-primary btn-lg"
               onClick={()=>setPhase('voting')}
             >
               开始投票
             </button>
           </div>
-        </>
+        </div>
       )}
 
       {phase === 'voting' && (
-        <Vote roomId={roomId} players={room.players}/>
+        <div className="animate-fade-in">
+          <Vote roomId={roomId} players={room.players}/>
+        </div>
       )}
 
       {phase === 'eliminated' && (
-        <div className="max-w-md mx-auto p-6 bg-white rounded shadow mt-10">
-          <h2 className="text-2xl mb-4 text-red-500">你已被淘汰</h2>
-          <h3 className="text-xl mb-2">本轮角色 & 词语</h3>
-          <ul className="list-disc pl-5 mb-6">
+        <div className="max-w-md mx-auto p-8 card animate-fade-in">
+          <h2 className="text-2xl font-bold text-center text-destructive mb-6">你已被淘汰</h2>
+          <h3 className="text-xl font-medium mb-4">本轮角色 & 词语</h3>
+          <div className="space-y-2 mb-6">
             {summary && Object.entries(summary).map(([pid,{word,role}])=>(
-              <li key={pid}>
-                {role==='spy'?'【卧底】':'【平民】'} {word} — {room.players.find(p=>p.id===pid)?.name}
-              </li>
+              <div 
+                key={pid}
+                className={`p-3 rounded-md ${
+                  role === 'spy' ? 'bg-destructive/10' : 'bg-secondary/50'
+                }`}
+              >
+                <span className={role === 'spy' ? 'text-destructive font-medium' : ''}>
+                  {role === 'spy' ? '【卧底】' : '【平民】'}
+                </span>
+                {' '}{word} — {room.players.find(p=>p.id===pid)?.name}
+              </div>
             ))}
-          </ul>
+          </div>
           <button
-            className="w-full bg-blue-500 text-white p-2 rounded"
+            className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
             onClick={resetGame}
           >
+            <HomeIcon className="h-5 w-5" />
             返回大厅
           </button>
         </div>
       )}
 
       {phase === 'finished' && (
-        <div className="max-w-md mx-auto p-6 bg-white rounded shadow mt-10 text-center">
-          <h1 className="text-3xl mb-6">游戏结束 🎉</h1>
+        <div className="max-w-md mx-auto p-8 card animate-fade-in text-center">
+          <h1 className="text-3xl font-bold mb-6">游戏结束 🎉</h1>
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="btn btn-primary btn-lg flex items-center justify-center gap-2"
             onClick={resetGame}
           >
+            <HomeIcon className="h-5 w-5" />
             返回大厅
           </button>
         </div>
