@@ -1,13 +1,13 @@
 // src/App.jsx
 import React from 'react';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider, useTheme } from 'next-themes';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import Room from './Room';
 import './index.css';
 
 function ThemeToggle() {
   const [mounted, setMounted] = React.useState(false);
-  const { theme, setTheme } = React.useContext(ThemeProvider);
+  const { theme, setTheme } = useTheme();
 
   React.useEffect(() => {
     setMounted(true);
