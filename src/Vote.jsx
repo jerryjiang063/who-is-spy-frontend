@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// Icons no longer needed
+import { UserMinusIcon, HandRaisedIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import socket from './socket';
 
 export default function Vote({ roomId, players }) {
@@ -16,18 +16,21 @@ export default function Vote({ roomId, players }) {
   };
 
   return (
-    <div className="card-center animate-fade-in text-center">
-      <h3 className="title text-center">
-        投票：请选择要淘汰的玩家
+    <div className="animate-fade-in text-center w-full">
+      <h3 className="title justify-center">
+        <UserMinusIcon className="icon-lg text-primary-hsl" />
+        投票淘汰一名玩家
       </h3>
-      <div className="w-full text-center">
+      <div className="w-full text-center space-y-4 mt-6">
         <div className="space-y-3 mb-6">
           {alivePlayers.map(p => (
             <label
               key={p.id}
-              className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-colors w-full text-center ${
-                target === p.id ? 'bg-primary/10 ring-2 ring-primary' : 'bg-secondary/50 hover:bg-secondary'
-              }`}
+              className={`flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-200 w-full text-center shadow-md border
+                ${target === p.id 
+                  ? 'bg-primary/20 border-primary ring-2 ring-primary text-primary-foreground' 
+                  : 'bg-white/30 border-white/50 hover:bg-white/50'
+                }`}
             >
               <input
                 type="radio"
@@ -36,20 +39,22 @@ export default function Vote({ roomId, players }) {
                 onChange={() => setTarget(p.id)}
                 className="sr-only"
               />
-              <div className="flex items-center justify-center gap-2 text-center">
-                <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center ${
-                  target === p.id ? 'border-primary' : 'border-muted-foreground'
-                }`}>
-                  {target === p.id && <div className="w-0.5 h-0.5 rounded-full bg-primary" />}
+              <div className="flex items-center justify-center gap-3 text-center">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                  ${target === p.id ? 'border-primary bg-primary' : 'border-muted-foreground bg-white/50'}
+                `}>
+                  {target === p.id && <div className="w-2 h-2 rounded-full bg-primary-foreground transition-all duration-200" />}
                 </div>
-                <span className="text-center">{p.name}</span>
-                <span className="text-sm text-muted-foreground text-center">({p.id.slice(-4)})</span>
+                <span className={`text-center font-medium ${target === p.id ? 'text-primary-foreground': 'text-foreground'}`}>{p.name}</span>
+                <span className={`text-sm ${target === p.id ? 'text-blue-100': 'text-muted-foreground'}`}>({p.id.slice(-4)})</span>
               </div>
             </label>
           ))}
           <label
-            className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-colors w-full text-center ${
-              target === 'abstain' ? 'bg-primary/10 ring-2 ring-primary' : 'bg-secondary/50 hover:bg-secondary'
+            className={`flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-200 w-full text-center shadow-md border
+            ${target === 'abstain' 
+              ? 'bg-secondary/20 border-secondary ring-2 ring-secondary text-secondary-foreground' 
+              : 'bg-white/30 border-white/50 hover:bg-white/50'
             }`}
           >
             <input
@@ -59,22 +64,25 @@ export default function Vote({ roomId, players }) {
               onChange={() => setTarget('abstain')}
               className="sr-only"
             />
-            <div className="flex items-center justify-center gap-2 text-center">
-              <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center ${
-                target === 'abstain' ? 'border-primary' : 'border-muted-foreground'
-              }`}>
-                {target === 'abstain' && <div className="w-0.5 h-0.5 rounded-full bg-primary" />}
-              </div>
-              <span className="text-center">
+            <div className="flex items-center justify-center gap-3 text-center">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                  ${target === 'abstain' ? 'border-secondary-foreground bg-secondary-foreground' : 'border-muted-foreground bg-white/50'}
+                `}>
+                  {target === 'abstain' && <div className="w-2 h-2 rounded-full bg-secondary transition-all duration-200" />}
+                </div>
+              <span className={`flex items-center gap-2 font-medium ${target === 'abstain' ? 'text-secondary-foreground': 'text-foreground'}`}>
+                <HandRaisedIcon className="icon-md" />
                 弃权
               </span>
             </div>
           </label>
         </div>
         <button
-          className="btn btn-primary w-full btn-lg justify-center text-center"
+          className="btn btn-primary w-full flex items-center justify-center gap-2"
           onClick={submit}
+          disabled={!target}
         >
+          <CheckCircleIcon className="icon-md" />
           提交投票
         </button>
       </div>
