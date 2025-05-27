@@ -4,53 +4,53 @@
 
 @layer base {
   :root {
-    --background: 216 13% 94%; /* #E8EDF4 */
+    --background: 197 72% 86%; /* #B3E5FC 天蓝色 */
     --foreground: 204 100% 50%; /* 天蓝色 */
     --card: 0 0% 100%;
     --card-foreground: 204 100% 50%;
     --primary: 204 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --radius: 2rem;
+    --radius: 2.5rem;
   }
   body {
-    @apply bg-[#E8EDF4] text-sky-500 font-black font-sans min-h-screen text-center;
-    font-size: 1.35rem;
+    @apply bg-[#B3E5FC] text-sky-500 font-black font-sans min-h-screen text-center flex items-center justify-center;
+    font-size: 2rem;
     letter-spacing: 0.01em;
     transition: background 0.3s;
   }
 }
 
 .page-center {
-  @apply min-h-screen flex flex-col items-center justify-center bg-[#E8EDF4] text-center animate-fadein px-2;
+  @apply min-h-screen w-full flex flex-col items-center justify-center bg-[#B3E5FC] text-center animate-fadein px-2;
 }
 
 .card-center {
-  @apply flex flex-col items-center justify-center w-full max-w-xl mx-auto text-center bg-white/70 rounded-3xl border-0 shadow-2xl p-10 backdrop-blur-lg animate-fadein;
+  @apply flex flex-col items-center justify-center w-full max-w-2xl mx-auto text-center bg-white/80 rounded-[2.5rem] border-0 shadow-2xl p-16 backdrop-blur-2xl animate-fadein;
 }
 
 .title {
-  @apply text-4xl font-black mb-10 text-sky-500 font-sans tracking-wide;
+  @apply text-6xl font-black mb-14 text-sky-500 font-sans tracking-wide;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-3xl text-2xl font-black font-sans px-10 py-4 my-3 transition-all duration-200 bg-white/70 text-sky-500 shadow-2xl backdrop-blur-lg hover:bg-white/90 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-sky-300 border-0;
-  box-shadow: 0 8px 32px 0 rgba(33,150,243,0.12);
+  @apply inline-flex items-center justify-center rounded-[2.5rem] text-4xl font-black font-sans px-16 py-7 my-5 transition-all duration-200 bg-white/80 text-sky-500 shadow-2xl backdrop-blur-2xl hover:bg-white/90 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-sky-300 border-0;
+  box-shadow: 0 12px 48px 0 rgba(33,150,243,0.16);
 }
 
 .btn-primary {
-  @apply bg-white/80 text-sky-500 border-0 hover:bg-sky-50;
+  @apply bg-white/90 text-sky-500 border-0 hover:bg-sky-50;
 }
 
 .btn-secondary {
-  @apply bg-white/60 text-sky-400 border-0 hover:bg-sky-100;
+  @apply bg-white/70 text-sky-400 border-0 hover:bg-sky-100;
 }
 
 .btn-lg {
-  @apply h-16 px-14 text-2xl;
+  @apply h-24 px-24 text-4xl;
 }
 
 .input {
-  @apply flex h-14 w-full rounded-3xl border-0 bg-white/70 px-6 py-3 text-2xl font-black font-sans text-sky-500 shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 placeholder:text-sky-300 mb-3 backdrop-blur-lg;
+  @apply flex h-20 w-full rounded-[2.5rem] border-0 bg-white/80 px-10 py-5 text-4xl font-black font-sans text-sky-500 shadow-2xl focus:outline-none focus:ring-2 focus:ring-sky-300 placeholder:text-sky-300 mb-5 backdrop-blur-2xl;
 }
 
 .fadein {
@@ -71,12 +71,12 @@
     @apply p-4 max-w-full;
   }
   .btn {
-    @apply text-lg px-4 py-3;
+    @apply text-2xl px-6 py-4;
   }
   .input {
-    @apply text-lg px-3 py-2;
+    @apply text-2xl px-4 py-3;
   }
   .title {
-    @apply text-2xl mb-6;
+    @apply text-3xl mb-8;
   }
 }
