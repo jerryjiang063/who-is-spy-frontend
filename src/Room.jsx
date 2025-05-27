@@ -69,11 +69,34 @@ export default function Room() {
     };
   }, [room.host]);
 
+  // 自动填充房主端的房间号
+  useEffect(() => {
+    if (room && room.id && !roomId) {
+      setRoomId(room.id);
+    }
+  }, [room, roomId]);
+
   const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
   const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
   const changeList    = ln=>socket.emit('change-list',{ roomId,listName:ln });
   const resetGame     = ()=>{ setPhase('lobby'); socket.emit('reset-game',{ roomId }); };
-  const startGame     = ()=>{ setSummary(null); socket.emit('start-game',{ roomId,spyCount }); };
+  const startGame     = ()=>{
+    if (!roomId) {
+      alert('房间号不能为空！');
+      return;
+    }
+    if (!isHost) {
+      alert('只有房主可以开始游戏！');
+      return;
+    }
+    if (!room.players || room.players.length < 2) {
+      alert('至少需要2名玩家才能开始游戏！');
+      return;
+    }
+    setSummary(null);
+    console.log('emit start-game', { roomId, spyCount });
+    socket.emit('start-game',{ roomId,spyCount });
+  };
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   useEffect(() => {
