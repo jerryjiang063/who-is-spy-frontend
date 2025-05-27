@@ -12,17 +12,12 @@ export default function Game({ word, role, visible }) {
     : '保密';
 
   return (
-    <div className="card-center fadein text-center">
-      <div className="space-y-8 w-full text-center">
-        <div>
-          <h3 className="text-2xl font-bold text-sky-500 mb-4">你的词语</h3>
-          <p className="text-4xl font-black text-sky-500 mb-2">{displayWord}</p>
-        </div>
-        <div>
-          <h3 className="text-2xl font-bold text-sky-500 mb-4">你的身份</h3>
-          <p className={`text-3xl font-black ${role === 'spy' && visible ? 'text-red-400' : 'text-sky-500'}`}>{displayRole}</p>
-        </div>
-      </div>
+    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+      <h2 className="text-4xl mb-6">游戏进行中</h2>
+      <div className="mb-8 text-2xl font-bold">{message}</div>
+      <div className="mb-8 text-2xl font-bold">{word && `你的词语：${word}`}</div>
+      <button className="w-full" onClick={onNext}>下一步</button>
+      <button className="w-full" onClick={onBack}>返回</button>
     </div>
   );
 }

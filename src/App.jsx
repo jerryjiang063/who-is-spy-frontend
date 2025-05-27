@@ -29,10 +29,12 @@ function ThemeToggle() {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="page-center text-center-all">
-        <ThemeToggle />
-        <div className="content-container">
-          <Room />
+      <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+        <h1 className="text-5xl mb-10">谁是卧底</h1>
+        <div className="flex flex-col gap-8 w-full max-w-xl items-center">
+          <button className="w-full" onClick={handleCreateRoom}>创建房间</button>
+          <button className="w-full" onClick={handleJoinRoom}>加入房间</button>
+          <button className="w-full" onClick={handleEditWordList}>词库编辑</button>
         </div>
       </div>
     </ThemeProvider>

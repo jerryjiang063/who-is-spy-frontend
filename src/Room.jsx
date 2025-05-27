@@ -63,73 +63,49 @@ export default function Room() {
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   return (
-    <div className="page-center text-center-all">
+    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+      <h2 className="text-4xl mb-6">房间号：{roomId}</h2>
+      <div className="mb-8">
+        <div className="text-2xl font-bold mb-2">玩家列表：</div>
+        <ul className="text-xl font-bold text-sky-600">
+          {room.players.map((p) => (
+            <li key={p.id}>{p.name}</li>
+          ))}
+        </ul>
+      </div>
       {phase === 'lobby' && (
-        <div className="card-center fadein">
-          <h2 className="title text-center">在线《谁是卧底》</h2>
+        <div className="space-y-4 w-full">
           <WordListEditor current={room.listName} onSelectList={changeList}/>
-          <div className="space-y-4 w-full">
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <input
-                className="input text-center"
-                placeholder="房间ID"
-                value={roomId}
-                onChange={e=>setRoomId(e.target.value)}
-              />
-              <input
-                className="input text-center"
-                placeholder="昵称"
-                value={name}
-                onChange={e=>setName(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <button 
-                className="btn btn-primary btn-lg justify-center w-full text-center"
-                onClick={createRoom}
-              >
-                <AiOutlinePlus className="mr-2 text-2xl" /> 创建房间
-              </button>
-              <button 
-                className="btn btn-secondary btn-lg justify-center w-full text-center"
-                onClick={joinRoom}
-              >
-                <AiOutlineUser className="mr-2 text-2xl" /> 加入房间
-              </button>
-            </div>
-            {isHost && (
-              <div className="space-y-3 w-full">
-                <button 
-                  className="btn btn-primary w-full btn-lg justify-center text-center"
-                  onClick={startGame}
-                >
-                  <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
-                </button>
-                <button 
-                  className="btn btn-secondary w-full btn-lg justify-center text-center"
-                  onClick={toggleVis}
-                >
-                  {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
-                </button>
-              </div>
-            )}
-            <div className="mt-6 w-full">
-              <h3 className="text-lg font-bold mb-3 text-center">玩家列表</h3>
-              <div className="space-y-2">
-                {room.players.map(p=>(
-                  <div 
-                    key={p.id}
-                    className="flex items-center justify-center gap-2 p-2 rounded-md bg-white/40 shadow text-center"
-                  >
-                    <span className="text-center font-bold text-sky-500">{p.name}</span>
-                    <span className="text-sm text-sky-400 text-center">
-                      ({p.id.slice(-4)})
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <button 
+              className="btn btn-primary btn-lg justify-center w-full text-center"
+              onClick={createRoom}
+            >
+              <AiOutlinePlus className="mr-2 text-2xl" /> 创建房间
+            </button>
+            <button 
+              className="btn btn-secondary btn-lg justify-center w-full text-center"
+              onClick={joinRoom}
+            >
+              <AiOutlineUser className="mr-2 text-2xl" /> 加入房间
+            </button>
           </div>
+          {isHost && (
+            <div className="space-y-3 w-full">
+              <button 
+                className="btn btn-primary w-full btn-lg justify-center text-center"
+                onClick={startGame}
+              >
+                <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
+              </button>
+              <button 
+                className="btn btn-secondary w-full btn-lg justify-center text-center"
+                onClick={toggleVis}
+              >
+                {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
+              </button>
+            </div>
+          )}
         </div>
       )}
       {phase === 'playing' && (

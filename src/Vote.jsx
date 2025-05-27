@@ -17,64 +17,26 @@ export default function Vote({ roomId, players }) {
   };
 
   return (
-    <div className="card-center fadein text-center">
-      <h3 className="text-2xl font-bold text-sky-500 mb-8">投票：请选择要淘汰的玩家</h3>
-      <div className="w-full text-center">
-        <div className="space-y-3 mb-6">
-          {alivePlayers.map(p => (
-            <label
-              key={p.id}
-              className={`flex items-center justify-center p-3 rounded-xl cursor-pointer transition-colors w-full text-center font-bold text-lg ${
-                target === p.id ? 'bg-sky-100 ring-2 ring-sky-300' : 'bg-white/40 hover:bg-sky-50'
-              }`}
-            >
-              <input
-                type="radio"
-                name="vote"
-                value={p.id}
-                onChange={() => setTarget(p.id)}
-                className="sr-only"
-              />
-              <div className="flex items-center justify-center gap-2 text-center">
-                <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${
-                  target === p.id ? 'border-sky-500' : 'border-sky-300'
-                }`}>
-                  {target === p.id && <div className="w-2 h-2 rounded-full bg-sky-500" />}
-                </div>
-                <span className="text-center font-bold text-sky-500">{p.name}</span>
-                <span className="text-sm text-sky-400 text-center">({p.id.slice(-4)})</span>
-              </div>
-            </label>
-          ))}
-          <label
-            className={`flex items-center justify-center p-3 rounded-xl cursor-pointer transition-colors w-full text-center font-bold text-lg ${
-              target === 'abstain' ? 'bg-sky-100 ring-2 ring-sky-300' : 'bg-white/40 hover:bg-sky-50'
-            }`}
-          >
-            <input
-              type="radio"
-              name="vote"
-              value="abstain"
-              onChange={() => setTarget('abstain')}
-              className="sr-only"
-            />
-            <div className="flex items-center justify-center gap-2 text-center">
-              <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${
-                target === 'abstain' ? 'border-sky-500' : 'border-sky-300'
-              }`}>
-                {target === 'abstain' && <div className="w-2 h-2 rounded-full bg-sky-500" />}
-              </div>
-              <span className="text-center">弃权</span>
-            </div>
-          </label>
-        </div>
+    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+      <h2 className="text-4xl mb-6">投票</h2>
+      <div className="mb-8 text-2xl font-bold">请选择你怀疑的卧底：</div>
+      <div className="flex flex-col gap-4 w-full max-w-md items-center">
+        {alivePlayers.map((p) => (
+          <button key={p.id} className="w-full" onClick={() => setTarget(p.id)}>{p.name}</button>
+        ))}
         <button
-          className="btn btn-primary w-full btn-lg justify-center text-center"
-          onClick={submit}
+          className={`w-full ${target === 'abstain' ? 'bg-sky-100 ring-2 ring-sky-300' : 'bg-white/40 hover:bg-sky-50'}`}
+          onClick={() => setTarget('abstain')}
         >
-          <AiOutlineCheckCircle className="mr-2 text-2xl" /> 提交投票
+          弃权
         </button>
       </div>
+      <button
+        className="w-full mt-8 btn btn-primary btn-lg justify-center text-center"
+        onClick={submit}
+      >
+        <AiOutlineCheckCircle className="mr-2 text-2xl" /> 提交投票
+      </button>
     </div>
   );
 }

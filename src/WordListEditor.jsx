@@ -61,98 +61,18 @@ export default function WordListEditor({ current, onSelectList }) {
   }
 
   return (
-    <div className="card-center fadein mb-6 text-center">
-      <h3 className="title text-center flex items-center justify-center gap-2">
-        <AiOutlineUnorderedList className="text-2xl" /> 词库管理
-      </h3>
-      <div className="space-y-4 w-full text-center">
-        <div className="flex gap-2 w-full">
-          <input
-            className="input flex-1 text-center"
-            placeholder="新建词库名称"
-            value={newList}
-            onChange={e => setNewList(e.target.value)}
-          />
-          <button 
-            className="btn btn-primary justify-center text-center flex items-center gap-2" 
-            onClick={createList}
-          >
-            <AiOutlinePlus className="text-2xl" /> 创建
-          </button>
-        </div>
-        <div className="flex gap-2 w-full">
-          <select
-            className="input flex-1 text-center"
-            value={current}
-            onChange={e => onSelectList(e.target.value)}
-          >
-            <option value="" className="text-center">请选择词库</option>
-            {lists.map(l => (
-              <option key={l} value={l} className="text-center">{l}</option>
-            ))}
-          </select>
-          <button
-            className="btn btn-secondary justify-center text-center flex items-center gap-2"
-            onClick={() => deleteList(current)}
-          >
-            <AiOutlineDelete className="text-2xl" /> 删除
-          </button>
-        </div>
-        {current && (
-          <div className="space-y-4 w-full text-center">
-            <div className="flex justify-between items-center w-full">
-              <h4 className="text-lg font-bold text-center flex items-center gap-2">
-                <AiOutlineUnorderedList className="text-xl" /> 词条列表：{current}
-              </h4>
-              <button
-                className="btn btn-secondary btn-sm justify-center text-center"
-                onClick={() => setShowItems(!showItems)}
-              >
-                {showItems ? '收起' : '展开'}
-              </button>
-            </div>
-            {showItems && (
-              <div className="space-y-4 animate-slide-down w-full text-center">
-                <div className="max-h-48 overflow-auto rounded-md border bg-white/40 w-full text-center">
-                  {items.length > 0 ? (
-                    <div className="divide-y">
-                      {items.map(i => (
-                        <div key={i} className="flex justify-between items-center p-2 hover:bg-sky-50 text-center">
-                          <span className="text-center font-bold text-sky-500">{i}</span>
-                          <button
-                            className="text-red-400 hover:text-red-600 p-1 rounded-full transition-colors text-center flex items-center gap-1"
-                            onClick={() => delItem(i)}
-                          >
-                            <AiOutlineDelete className="text-xl" /> 删除
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-4 text-center text-sky-400">
-                      暂无词条
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2 w-full">
-                  <input
-                    className="input flex-1 text-center"
-                    placeholder="格式：平民词,卧底词"
-                    value={newItem}
-                    onChange={e => setNewItem(e.target.value)}
-                  />
-                  <button 
-                    className="btn btn-primary justify-center text-center flex items-center gap-2" 
-                    onClick={addItem}
-                  >
-                    <AiOutlinePlus className="text-2xl" /> 添加
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
+      <h2 className="text-4xl mb-6">词库编辑</h2>
+      <form className="flex flex-col gap-6 w-full max-w-lg items-center" onSubmit={handleSubmit}>
+        <textarea
+          className="w-full text-2xl font-bold rounded-3xl p-6 border-2 border-sky-200 bg-white/80 text-sky-600 shadow-xl focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
+          rows={8}
+          value={wordList}
+          onChange={e => setWordList(e.target.value)}
+        />
+        <button type="submit" className="w-full">保存</button>
+        <button type="button" className="w-full" onClick={onBack}>返回</button>
+      </form>
     </div>
   )
 }
