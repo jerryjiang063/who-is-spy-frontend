@@ -85,7 +85,7 @@ export default function WordListEditor({ current, onSelectList }) {
                       {items.map(i => (
                         <div key={i} className="flex justify-between items-center p-2 hover:bg-sky-50">
                           <span className="font-bold text-sky-500">{i}</span>
-                          <button className="w-auto text-red-400 hover:text-red-600" onClick={() => delItem(i)}>删除</button>
+                          <button className="w-auto text-red-400 hover:text-red-600 text-base px-2 py-1" onClick={() => delItem(i)}>删除</button>
                         </div>
                       ))}
                     </div>

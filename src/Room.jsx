@@ -71,73 +71,68 @@ export default function Room() {
   return (
     <div className="card-center min-h-screen w-full flex flex-col items-center justify-center relative">
       <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
-      <div className="flex flex-col gap-6 w-full max-w-xl items-center">
-        <input
-          className="w-full"
-          placeholder="房间号"
-          value={roomId}
-          onChange={e => setRoomId(e.target.value)}
-        />
-        <input
-          className="w-full"
-          placeholder="昵称"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <button className="w-full" onClick={createRoom}>创建房间</button>
-        <button className="w-full" onClick={joinRoom}>加入房间</button>
-      </div>
-      <div className="absolute bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none">
-        By 姜姜大当家 | 谁是卧底在线版 | 2025
-      </div>
-      <h2 className="text-4xl mb-6">房间号：{roomId}</h2>
-      <div className="mb-8">
-        <div className="text-2xl font-bold mb-2">玩家列表：</div>
-        <ul className="text-xl font-bold text-sky-600">
-          {room.players.map((p) => (
-            <li key={p.id}>{p.name}</li>
-          ))}
-        </ul>
-      </div>
       {phase === 'lobby' && (
-        <div className="space-y-4 w-full">
-          <WordListEditor current={room.listName} onSelectList={changeList}/>
-          <div className="grid grid-cols-2 gap-4 w-full">
-            <button 
-              className="btn btn-primary btn-lg justify-center w-full text-center"
-              onClick={startGame}
-            >
-              <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
-            </button>
-            <button 
-              className="btn btn-secondary btn-lg justify-center w-full text-center"
-              onClick={toggleVis}
-            >
-              {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
-            </button>
+        <div className="flex flex-col gap-4 w-full max-w-xl items-center">
+          <input
+            className="w-full text-base py-2 px-4"
+            placeholder="房间号"
+            value={roomId}
+            onChange={e => setRoomId(e.target.value)}
+          />
+          <input
+            className="w-full text-base py-2 px-4"
+            placeholder="昵称"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+          <button className="w-full text-base py-2" onClick={createRoom}>创建房间</button>
+          <button className="w-full text-base py-2" onClick={joinRoom}>加入房间</button>
+          <div className="mb-8 w-full">
+            <div className="text-2xl font-bold mb-2">玩家列表：</div>
+            <ul className="text-xl font-bold text-sky-600">
+              {room.players.map((p) => (
+                <li key={p.id}>{p.name}</li>
+              ))}
+            </ul>
           </div>
+          {isHost && (
+            <div className="space-y-3 w-full">
+              <button 
+                className="w-full text-base py-2"
+                onClick={startGame}
+              >
+                开始游戏
+              </button>
+              <button 
+                className="w-full text-base py-2"
+                onClick={toggleVis}
+              >
+                {visible ? '隐藏身份' : '显示身份'}
+              </button>
+            </div>
+          )}
         </div>
       )}
       {phase === 'playing' && (
-        <div className="card-center fadein">
+        <div className="w-full">
           <Game word={myWord} role={myRole} visible={visible}/>
           <div className="mt-6 text-center w-full">
             <button
-              className="btn btn-primary btn-lg justify-center w-full text-center"
+              className="w-full text-base py-2"
               onClick={()=>setPhase('voting')}
             >
-              <AiOutlineCheckCircle className="mr-2 text-2xl" /> 开始投票
+              开始投票
             </button>
           </div>
         </div>
       )}
       {phase === 'voting' && (
-        <div className="card-center fadein">
+        <div className="w-full">
           <Vote roomId={roomId} players={room.players}/>
         </div>
       )}
       {phase === 'eliminated' && (
-        <div className="card-center fadein">
+        <div className="w-full">
           <h2 className="title text-destructive text-center">你已被淘汰</h2>
           <div className="w-full text-center">
             <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
@@ -157,27 +152,30 @@ export default function Room() {
               ))}
             </div>
             <button
-              className="btn btn-primary w-full btn-lg justify-center text-center"
+              className="w-full text-base py-2"
               onClick={resetGame}
             >
-              <AiOutlineHome className="mr-2 text-2xl" /> 返回大厅
+              返回大厅
             </button>
           </div>
         </div>
       )}
       {phase === 'finished' && (
-        <div className="card-center fadein">
+        <div className="w-full">
           <h1 className="title text-center">游戏结束 🎉</h1>
           <div className="w-full text-center">
             <button
-              className="btn btn-primary btn-lg justify-center w-full text-center"
+              className="w-full text-base py-2"
               onClick={resetGame}
             >
-              <AiOutlineHome className="mr-2 text-2xl" /> 返回大厅
+              返回大厅
             </button>
           </div>
         </div>
       )}
+      <div className="fixed bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none z-50">
+        By 姜姜大当家 | 谁是卧底在线版 | 2025
+      </div>
     </div>
   );
 }
