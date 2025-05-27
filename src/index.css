@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 216 13% 94%;
+    --background: 216 13% 94%; /* #E8EDF4 */
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -97,30 +97,6 @@
 
 .title {
   @apply text-2xl font-bold mb-6 flex items-center justify-center gap-2;
-}
-
-.icon-sm {
-  @apply h-4 w-4;
-}
-
-.icon-md {
-  @apply h-5 w-5;
-}
-
-.icon-lg {
-  @apply h-6 w-6;
-}
-
-.icon-xs {
-  @apply h-3 w-3;
-}
-
-.icon-xxs {
-  @apply h-2 w-2;
-}
-
-.icon-xxxs {
-  @apply h-1.5 w-1.5;
 }
 
 .page-center {

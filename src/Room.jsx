@@ -1,13 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  UserGroupIcon, 
-  UserPlusIcon, 
-  PlayIcon, 
-  EyeIcon, 
-  EyeSlashIcon,
-  HomeIcon,
-  UserIcon
-} from '@heroicons/react/24/outline';
 import socket from './socket';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
@@ -75,7 +66,6 @@ export default function Room() {
       {phase === 'lobby' && (
         <div className="card-center animate-fade-in text-center-all">
           <h2 className="title text-center">
-            <UserGroupIcon className="icon-xxxs" />
             在线《谁是卧底》
           </h2>
           <WordListEditor current={room.listName} onSelectList={changeList}/>
@@ -96,44 +86,31 @@ export default function Room() {
             </div>
             <div className="grid grid-cols-2 gap-4 w-full">
               <button 
-                className="btn btn-primary btn-lg flex items-center justify-center gap-1 w-full text-center"
+                className="btn btn-primary btn-lg justify-center w-full text-center"
                 onClick={createRoom}
               >
-                <UserPlusIcon className="icon-xxxs" />
                 创建房间
               </button>
               <button 
-                className="btn btn-secondary btn-lg flex items-center justify-center gap-1 w-full text-center"
+                className="btn btn-secondary btn-lg justify-center w-full text-center"
                 onClick={joinRoom}
               >
-                <UserIcon className="icon-xxxs" />
                 加入房间
               </button>
             </div>
             {isHost && (
               <div className="space-y-3 w-full">
                 <button 
-                  className="btn btn-primary w-full btn-lg flex items-center justify-center gap-1 text-center"
+                  className="btn btn-primary w-full btn-lg justify-center text-center"
                   onClick={startGame}
                 >
-                  <PlayIcon className="icon-xxxs" />
                   开始游戏
                 </button>
                 <button 
-                  className="btn btn-secondary w-full btn-lg flex items-center justify-center gap-1 text-center"
+                  className="btn btn-secondary w-full btn-lg justify-center text-center"
                   onClick={toggleVis}
                 >
-                  {visible ? (
-                    <>
-                      <EyeSlashIcon className="icon-xxxs" />
-                      隐藏身份
-                    </>
-                  ) : (
-                    <>
-                      <EyeIcon className="icon-xxxs" />
-                      显示身份
-                    </>
-                  )}
+                  {visible ? '隐藏身份' : '显示身份'}
                 </button>
               </div>
             )}
@@ -145,7 +122,6 @@ export default function Room() {
                     key={p.id}
                     className="flex items-center justify-center gap-2 p-2 rounded-md bg-secondary/50 text-center"
                   >
-                    <UserIcon className="icon-xxxs text-primary" />
                     <span className="text-center">{p.name}</span>
                     <span className="text-sm text-muted-foreground text-center">
                       ({p.id.slice(-4)})
@@ -162,7 +138,7 @@ export default function Room() {
           <Game word={myWord} role={myRole} visible={visible}/>
           <div className="mt-6 text-center w-full">
             <button
-              className="btn btn-primary btn-lg inline-flex items-center justify-center gap-1 w-full text-center"
+              className="btn btn-primary btn-lg justify-center w-full text-center"
               onClick={()=>setPhase('voting')}
             >
               开始投票
@@ -196,10 +172,9 @@ export default function Room() {
               ))}
             </div>
             <button
-              className="btn btn-primary w-full btn-lg flex items-center justify-center gap-1 text-center"
+              className="btn btn-primary w-full btn-lg justify-center text-center"
               onClick={resetGame}
             >
-              <HomeIcon className="icon-xxxs" />
               返回大厅
             </button>
           </div>
@@ -210,10 +185,9 @@ export default function Room() {
           <h1 className="title text-center">游戏结束 🎉</h1>
           <div className="w-full text-center">
             <button
-              className="btn btn-primary btn-lg flex items-center justify-center gap-1 w-full text-center"
+              className="btn btn-primary btn-lg justify-center w-full text-center"
               onClick={resetGame}
             >
-              <HomeIcon className="icon-xxxs" />
               返回大厅
             </button>
           </div>

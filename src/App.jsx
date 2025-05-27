@@ -1,7 +1,7 @@
 // src/App.jsx
 import React from 'react';
 import { ThemeProvider, useTheme } from 'next-themes';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+// import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'; // No longer needed
 import Room from './Room';
 import './index.css';
 
@@ -18,14 +18,10 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="fixed top-4 right-4 p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+      className="fixed top-4 right-4 p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-sm"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? (
-        <SunIcon className="icon-md" />
-      ) : (
-        <MoonIcon className="icon-md" />
-      )}
+      {theme === 'dark' ? '切换亮色' : '切换暗色'}
     </button>
   );
 }
@@ -33,7 +29,7 @@ function ThemeToggle() {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="page-container">
+      <div className="page-center text-center-all">
         <ThemeToggle />
         <div className="content-container">
           <Room />

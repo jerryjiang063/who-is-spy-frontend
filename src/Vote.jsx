@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserMinusIcon, HandRaisedIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+// Icons no longer needed
 import socket from './socket';
 
 export default function Vote({ roomId, players }) {
@@ -18,7 +18,6 @@ export default function Vote({ roomId, players }) {
   return (
     <div className="card-center animate-fade-in text-center">
       <h3 className="title text-center">
-        <UserMinusIcon className="icon-xxxs" />
         投票：请选择要淘汰的玩家
       </h3>
       <div className="w-full text-center">
@@ -37,7 +36,7 @@ export default function Vote({ roomId, players }) {
                 onChange={() => setTarget(p.id)}
                 className="sr-only"
               />
-              <div className="flex items-center gap-2 text-center">
+              <div className="flex items-center justify-center gap-2 text-center">
                 <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center ${
                   target === p.id ? 'border-primary' : 'border-muted-foreground'
                 }`}>
@@ -60,24 +59,22 @@ export default function Vote({ roomId, players }) {
               onChange={() => setTarget('abstain')}
               className="sr-only"
             />
-            <div className="flex items-center gap-2 text-center">
+            <div className="flex items-center justify-center gap-2 text-center">
               <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center ${
                 target === 'abstain' ? 'border-primary' : 'border-muted-foreground'
               }`}>
                 {target === 'abstain' && <div className="w-0.5 h-0.5 rounded-full bg-primary" />}
               </div>
-              <span className="flex items-center gap-1 text-center">
-                <HandRaisedIcon className="icon-xxxs text-muted-foreground" />
+              <span className="text-center">
                 弃权
               </span>
             </div>
           </label>
         </div>
         <button
-          className="btn btn-primary w-full btn-lg flex items-center justify-center gap-1 text-center"
+          className="btn btn-primary w-full btn-lg justify-center text-center"
           onClick={submit}
         >
-          <CheckCircleIcon className="icon-xxxs" />
           提交投票
         </button>
       </div>
