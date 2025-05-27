@@ -1,6 +1,6 @@
 // who-is-spy-frontend/src/Game.jsx
 import React from 'react';
-import { DocumentTextIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+// Icons no longer needed
 
 export default function Game({ word, role, visible }) {
   // 词语永远展示
@@ -12,25 +12,15 @@ export default function Game({ word, role, visible }) {
     : '保密';
 
   return (
-    <div className="animate-fade-in text-center w-full">
+    <div className="card-center fadein text-center">
       <div className="space-y-8 w-full text-center">
         <div>
-          <h3 className="title text-2xl justify-center">
-            <DocumentTextIcon className="icon-md text-primary-hsl" />
-            你的词语
-          </h3>
-          <p className="text-4xl font-bold text-primary-hsl text-center tracking-wider py-2">
-            {displayWord}
-          </p>
+          <h3 className="text-2xl font-bold text-sky-500 mb-4">你的词语</h3>
+          <p className="text-4xl font-black text-sky-500 mb-2">{displayWord}</p>
         </div>
         <div>
-          <h3 className="title text-2xl justify-center">
-            <UserCircleIcon className="icon-md text-primary-hsl" />
-            你的身份
-          </h3>
-          <p className={`text-3xl font-semibold text-center py-2 ${role === 'spy' && visible ? 'text-destructive' : 'text-foreground'}`}>
-            {displayRole}
-          </p>
+          <h3 className="text-2xl font-bold text-sky-500 mb-4">你的身份</h3>
+          <p className={`text-3xl font-black ${role === 'spy' && visible ? 'text-red-400' : 'text-sky-500'}`}>{displayRole}</p>
         </div>
       </div>
     </div>

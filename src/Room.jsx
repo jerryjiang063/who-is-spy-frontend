@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  UserGroupIcon,
-  UserPlusIcon,
-  PlayIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  HomeIcon,
-  ArrowPathIcon // For Reset Game, more indicative of a refresh/reset
-} from '@heroicons/react/24/outline';
+import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle } from 'react-icons/ai';
 import socket from './socket';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
@@ -71,147 +63,131 @@ export default function Room() {
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   return (
-    <div className="page-center text-center-all w-full">
+    <div className="page-center text-center-all">
       {phase === 'lobby' && (
-        <div className="card p-6 md:p-8 animate-fade-in text-center-all w-full">
-          <h2 className="title">
-            <UserGroupIcon className="icon-lg text-primary-hsl" /> 
-            在线《谁是卧底》
-          </h2>
+        <div className="card-center fadein">
+          <h2 className="title text-center">在线《谁是卧底》</h2>
           <WordListEditor current={room.listName} onSelectList={changeList}/>
-          <div className="space-y-5 w-full mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          <div className="space-y-4 w-full">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <input
-                className="input"
+                className="input text-center"
                 placeholder="房间ID"
                 value={roomId}
                 onChange={e=>setRoomId(e.target.value)}
               />
               <input
-                className="input"
+                className="input text-center"
                 placeholder="昵称"
                 value={name}
                 onChange={e=>setName(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <button 
-                className="btn btn-primary w-full flex items-center justify-center gap-2"
+                className="btn btn-primary btn-lg justify-center w-full text-center"
                 onClick={createRoom}
               >
-                <UserPlusIcon className="icon-md" />
-                创建房间
+                <AiOutlinePlus className="mr-2 text-2xl" /> 创建房间
               </button>
               <button 
-                className="btn btn-secondary w-full flex items-center justify-center gap-2"
+                className="btn btn-secondary btn-lg justify-center w-full text-center"
                 onClick={joinRoom}
               >
-                <UserPlusIcon className="icon-md" /> {/* Corrected to UserPlusIcon for joining as well, or can be UsersIcon */} 
-                加入房间
+                <AiOutlineUser className="mr-2 text-2xl" /> 加入房间
               </button>
             </div>
             {isHost && (
-              <div className="space-y-4 w-full pt-4">
+              <div className="space-y-3 w-full">
                 <button 
-                  className="btn btn-primary w-full flex items-center justify-center gap-2"
+                  className="btn btn-primary w-full btn-lg justify-center text-center"
                   onClick={startGame}
                 >
-                  <PlayIcon className="icon-md" />
-                  开始游戏
+                  <AiOutlinePlayCircle className="mr-2 text-2xl" /> 开始游戏
                 </button>
                 <button 
-                  className="btn btn-secondary w-full flex items-center justify-center gap-2"
+                  className="btn btn-secondary w-full btn-lg justify-center text-center"
                   onClick={toggleVis}
                 >
-                  {visible ? <EyeSlashIcon className="icon-md" /> : <EyeIcon className="icon-md" />}
-                  {visible ? '隐藏身份' : '显示身份'}
+                  {visible ? <><AiOutlineEyeInvisible className="mr-2 text-2xl" /> 隐藏身份</> : <><AiOutlineEye className="mr-2 text-2xl" /> 显示身份</>}
                 </button>
               </div>
             )}
-            <div className="mt-8 w-full">
-              <h3 className="text-xl font-semibold mb-4 text-center">玩家列表</h3>
-              <div className="space-y-2 max-h-60 overflow-y-auto p-1">
-                {room.players.length > 0 ? room.players.map(p=>(
+            <div className="mt-6 w-full">
+              <h3 className="text-lg font-bold mb-3 text-center">玩家列表</h3>
+              <div className="space-y-2">
+                {room.players.map(p=>(
                   <div 
                     key={p.id}
-                    className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/20 text-center shadow"
+                    className="flex items-center justify-center gap-2 p-2 rounded-md bg-white/40 shadow text-center"
                   >
-                    {/* Optionally add a generic user icon here if desired */}
-                    <span className="text-center font-medium">{p.name}</span>
-                    <span className="text-sm text-muted-foreground text-center">
+                    <span className="text-center font-bold text-sky-500">{p.name}</span>
+                    <span className="text-sm text-sky-400 text-center">
                       ({p.id.slice(-4)})
                     </span>
                   </div>
-                )) : <p className="text-muted-foreground p-4">等待玩家加入...</p>}
+                ))}
               </div>
             </div>
           </div>
         </div>
       )}
       {phase === 'playing' && (
-        <div className="card p-6 md:p-8 animate-fade-in text-center-all w-full">
+        <div className="card-center fadein">
           <Game word={myWord} role={myRole} visible={visible}/>
-          <div className="mt-8 text-center w-full">
+          <div className="mt-6 text-center w-full">
             <button
-              className="btn btn-primary w-full flex items-center justify-center gap-2"
+              className="btn btn-primary btn-lg justify-center w-full text-center"
               onClick={()=>setPhase('voting')}
             >
-               <PlayIcon className="icon-md transform rotate-90" /> {/* Using PlayIcon rotated for "next step" feel */}
-              开始投票
+              <AiOutlineCheckCircle className="mr-2 text-2xl" /> 开始投票
             </button>
           </div>
         </div>
       )}
       {phase === 'voting' && (
-        <div className="card p-6 md:p-8 animate-fade-in text-center-all w-full">
+        <div className="card-center fadein">
           <Vote roomId={roomId} players={room.players}/>
         </div>
       )}
       {phase === 'eliminated' && (
-        <div className="card p-6 md:p-8 animate-fade-in text-center-all w-full">
-          <h2 className="title text-destructive"><span className="text-center">你已被淘汰!</span></h2>
-          <div className="w-full text-center space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold mb-3 text-center">本轮词语和身份</h3>
-              <div className="space-y-2 text-left">
-                {summary && Object.entries(summary).map(([pid,{word,role}])=>(
-                  <div 
-                    key={pid}
-                    className={`p-3 rounded-lg text-center shadow ${
-                      role === 'spy' ? 'bg-destructive/10' : 'bg-white/20'
-                    }`}
-                  >
-                    <span className={`font-medium ${role === 'spy' ? 'text-destructive' : 'text-primary-hsl'}`}>
-                      {role === 'spy' ? '【卧底】' : '【平民】'}
-                    </span>
-                    <span className="mx-2">-</span>
-                    <span className="font-medium">{word}</span>
-                    <span className="mx-2">-</span>
-                    <span className="text-muted-foreground">{room.players.find(p=>p.id===pid)?.name}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="card-center fadein">
+          <h2 className="title text-destructive text-center">你已被淘汰</h2>
+          <div className="w-full text-center">
+            <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
+            <div className="space-y-2 mb-6">
+              {summary && Object.entries(summary).map(([pid,{word,role}])=>(
+                <div 
+                  key={pid}
+                  className={`p-3 rounded-md text-center ${
+                    role === 'spy' ? 'bg-sky-100' : 'bg-white/40'
+                  }`}
+                >
+                  <span className={`text-center font-bold ${role === 'spy' ? 'text-red-400' : 'text-sky-500'}`}>
+                    {role === 'spy' ? '【卧底】' : '【平民】'}
+                  </span>
+                  <span className="text-center">{' '}{word} — {room.players.find(p=>p.id===pid)?.name}</span>
+                </div>
+              ))}
             </div>
             <button
-              className="btn btn-secondary w-full flex items-center justify-center gap-2"
+              className="btn btn-primary w-full btn-lg justify-center text-center"
               onClick={resetGame}
             >
-              <ArrowPathIcon className="icon-md" />
-              返回大厅
+              <AiOutlineHome className="mr-2 text-2xl" /> 返回大厅
             </button>
           </div>
         </div>
       )}
       {phase === 'finished' && (
-        <div className="card p-6 md:p-8 animate-fade-in text-center-all w-full">
+        <div className="card-center fadein">
           <h1 className="title text-center">游戏结束 🎉</h1>
-          <div className="w-full text-center mt-6">
+          <div className="w-full text-center">
             <button
-              className="btn btn-primary w-full flex items-center justify-center gap-2"
+              className="btn btn-primary btn-lg justify-center w-full text-center"
               onClick={resetGame}
             >
-              <HomeIcon className="icon-md" />
-              返回大厅
+              <AiOutlineHome className="mr-2 text-2xl" /> 返回大厅
             </button>
           </div>
         </div>
