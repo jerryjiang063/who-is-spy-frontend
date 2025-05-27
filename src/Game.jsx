@@ -14,10 +14,8 @@ export default function Game({ word, role, visible }) {
   return (
     <div className="card-center min-h-screen w-full flex flex-col items-center justify-center">
       <h2 className="text-4xl mb-6">游戏进行中</h2>
-      <div className="mb-8 text-2xl font-bold">{message}</div>
-      <div className="mb-8 text-2xl font-bold">{word && `你的词语：${word}`}</div>
-      <button className="w-full" onClick={onNext}>下一步</button>
-      <button className="w-full" onClick={onBack}>返回</button>
+      <div className="mb-8 text-2xl font-bold">{displayWord && `你的词语：${displayWord}`}</div>
+      <div className="mb-8 text-2xl font-bold">{`你的身份：${displayRole}`}</div>
     </div>
   );
 }
