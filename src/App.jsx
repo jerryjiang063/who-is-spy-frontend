@@ -22,9 +22,9 @@ function ThemeToggle() {
       aria-label="Toggle theme"
     >
       {theme === 'dark' ? (
-        <SunIcon className="h-6 w-6" />
+        <SunIcon className="icon-md" />
       ) : (
-        <MoonIcon className="h-6 w-6" />
+        <MoonIcon className="icon-md" />
       )}
     </button>
   );
@@ -33,9 +33,9 @@ function ThemeToggle() {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground transition-colors duration-300">
+      <div className="page-container">
         <ThemeToggle />
-        <div className="container py-8">
+        <div className="content-container">
           <Room />
         </div>
       </div>

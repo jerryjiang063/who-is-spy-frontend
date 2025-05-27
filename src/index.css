@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 216 13% 94%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -54,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#E8EDF4] text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -80,9 +80,33 @@
 }
 
 .card {
-  @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+  @apply rounded-lg border bg-white text-card-foreground shadow-sm;
 }
 
 .container {
   @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+}
+
+.page-container {
+  @apply min-h-screen flex flex-col items-center justify-center px-4;
+}
+
+.content-container {
+  @apply w-full max-w-md mx-auto text-center;
+}
+
+.title {
+  @apply text-2xl font-bold mb-6 flex items-center justify-center gap-2;
+}
+
+.icon-sm {
+  @apply h-4 w-4;
+}
+
+.icon-md {
+  @apply h-5 w-5;
+}
+
+.icon-lg {
+  @apply h-6 w-6;
 }

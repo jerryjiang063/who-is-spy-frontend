@@ -71,26 +71,26 @@ export default function Room() {
   const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
   return (
-    <div className="min-h-screen bg-background py-10 transition-colors duration-300">
+    <div className="w-full py-10">
       {phase === 'lobby' && (
-        <div className="max-w-md mx-auto p-8 card animate-fade-in">
-          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
-            <UserGroupIcon className="h-8 w-8 text-primary" />
+        <div className="card animate-fade-in">
+          <h2 className="title">
+            <UserGroupIcon className="icon-md" />
             在线《谁是卧底》
           </h2>
           
           <WordListEditor current={room.listName} onSelectList={changeList}/>
           
-          <div className="space-y-4 mt-6">
+          <div className="space-y-4 mt-6 px-6 pb-6">
             <div className="grid grid-cols-2 gap-4">
               <input
-                className="input"
+                className="input text-center"
                 placeholder="房间ID"
                 value={roomId}
                 onChange={e=>setRoomId(e.target.value)}
               />
               <input
-                className="input"
+                className="input text-center"
                 placeholder="昵称"
                 value={name}
                 onChange={e=>setName(e.target.value)}
@@ -102,14 +102,14 @@ export default function Room() {
                 className="btn btn-primary btn-lg flex items-center justify-center gap-2"
                 onClick={createRoom}
               >
-                <UserPlusIcon className="h-5 w-5" />
+                <UserPlusIcon className="icon-sm" />
                 创建房间
               </button>
               <button 
                 className="btn btn-secondary btn-lg flex items-center justify-center gap-2"
                 onClick={joinRoom}
               >
-                <UserIcon className="h-5 w-5" />
+                <UserIcon className="icon-sm" />
                 加入房间
               </button>
             </div>
@@ -120,7 +120,7 @@ export default function Room() {
                   className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
                   onClick={startGame}
                 >
-                  <PlayIcon className="h-5 w-5" />
+                  <PlayIcon className="icon-sm" />
                   开始游戏
                 </button>
                 <button 
@@ -129,12 +129,12 @@ export default function Room() {
                 >
                   {visible ? (
                     <>
-                      <EyeSlashIcon className="h-5 w-5" />
+                      <EyeSlashIcon className="icon-sm" />
                       隐藏身份
                     </>
                   ) : (
                     <>
-                      <EyeIcon className="h-5 w-5" />
+                      <EyeIcon className="icon-sm" />
                       显示身份
                     </>
                   )}
@@ -143,17 +143,17 @@ export default function Room() {
             )}
 
             <div className="mt-6">
-              <h3 className="text-lg font-medium mb-3">玩家列表：</h3>
+              <h3 className="text-lg font-medium mb-3 text-center">玩家列表</h3>
               <div className="space-y-2">
                 {room.players.map(p=>(
                   <div 
                     key={p.id}
-                    className="flex items-center gap-2 p-2 rounded-md bg-secondary/50"
+                    className="flex items-center justify-center gap-2 p-2 rounded-md bg-secondary/50"
                   >
-                    <UserIcon className="h-5 w-5 text-primary" />
+                    <UserIcon className="icon-sm text-primary" />
                     <span>{p.name}</span>
-                    <span className="text-sm text-muted-foreground ml-auto">
-                      {p.id.slice(-4)}
+                    <span className="text-sm text-muted-foreground">
+                      ({p.id.slice(-4)})
                     </span>
                   </div>
                 ))}
@@ -166,9 +166,9 @@ export default function Room() {
       {phase === 'playing' && (
         <div className="animate-fade-in">
           <Game word={myWord} role={myRole} visible={visible}/>
-          <div className="max-w-md mx-auto mt-6 text-center">
+          <div className="mt-6 text-center">
             <button
-              className="btn btn-primary btn-lg"
+              className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2"
               onClick={()=>setPhase('voting')}
             >
               开始投票
@@ -184,44 +184,48 @@ export default function Room() {
       )}
 
       {phase === 'eliminated' && (
-        <div className="max-w-md mx-auto p-8 card animate-fade-in">
-          <h2 className="text-2xl font-bold text-center text-destructive mb-6">你已被淘汰</h2>
-          <h3 className="text-xl font-medium mb-4">本轮角色 & 词语</h3>
-          <div className="space-y-2 mb-6">
-            {summary && Object.entries(summary).map(([pid,{word,role}])=>(
-              <div 
-                key={pid}
-                className={`p-3 rounded-md ${
-                  role === 'spy' ? 'bg-destructive/10' : 'bg-secondary/50'
-                }`}
-              >
-                <span className={role === 'spy' ? 'text-destructive font-medium' : ''}>
-                  {role === 'spy' ? '【卧底】' : '【平民】'}
-                </span>
-                {' '}{word} — {room.players.find(p=>p.id===pid)?.name}
-              </div>
-            ))}
+        <div className="card animate-fade-in">
+          <h2 className="title text-destructive">你已被淘汰</h2>
+          <div className="px-6 pb-6">
+            <h3 className="text-xl font-medium mb-4 text-center">本轮角色 & 词语</h3>
+            <div className="space-y-2 mb-6">
+              {summary && Object.entries(summary).map(([pid,{word,role}])=>(
+                <div 
+                  key={pid}
+                  className={`p-3 rounded-md text-center ${
+                    role === 'spy' ? 'bg-destructive/10' : 'bg-secondary/50'
+                  }`}
+                >
+                  <span className={role === 'spy' ? 'text-destructive font-medium' : ''}>
+                    {role === 'spy' ? '【卧底】' : '【平民】'}
+                  </span>
+                  {' '}{word} — {room.players.find(p=>p.id===pid)?.name}
+                </div>
+              ))}
+            </div>
+            <button
+              className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
+              onClick={resetGame}
+            >
+              <HomeIcon className="icon-sm" />
+              返回大厅
+            </button>
           </div>
-          <button
-            className="btn btn-primary w-full btn-lg flex items-center justify-center gap-2"
-            onClick={resetGame}
-          >
-            <HomeIcon className="h-5 w-5" />
-            返回大厅
-          </button>
         </div>
       )}
 
       {phase === 'finished' && (
-        <div className="max-w-md mx-auto p-8 card animate-fade-in text-center">
-          <h1 className="text-3xl font-bold mb-6">游戏结束 🎉</h1>
-          <button
-            className="btn btn-primary btn-lg flex items-center justify-center gap-2"
-            onClick={resetGame}
-          >
-            <HomeIcon className="h-5 w-5" />
-            返回大厅
-          </button>
+        <div className="card animate-fade-in">
+          <h1 className="title">游戏结束 🎉</h1>
+          <div className="px-6 pb-6">
+            <button
+              className="btn btn-primary btn-lg flex items-center justify-center gap-2"
+              onClick={resetGame}
+            >
+              <HomeIcon className="icon-sm" />
+              返回大厅
+            </button>
+          </div>
         </div>
       )}
     </div>

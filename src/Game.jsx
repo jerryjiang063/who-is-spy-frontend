@@ -12,20 +12,20 @@ export default function Game({ word, role, visible }) {
     : '保密';
 
   return (
-    <div className="p-8 card max-w-md mx-auto animate-fade-in">
-      <div className="space-y-6">
+    <div className="card animate-fade-in">
+      <div className="p-6 space-y-6 text-center">
         <div>
-          <h3 className="text-xl font-medium mb-3 flex items-center gap-2">
-            <DocumentTextIcon className="h-6 w-6 text-primary" />
-            你的词语：
+          <h3 className="title">
+            <DocumentTextIcon className="icon-md" />
+            你的词语
           </h3>
           <p className="text-3xl font-bold text-primary">{displayWord}</p>
         </div>
         
         <div>
-          <h3 className="text-xl font-medium mb-3 flex items-center gap-2">
-            <UserCircleIcon className="h-6 w-6 text-primary" />
-            你的身份：
+          <h3 className="title">
+            <UserCircleIcon className="icon-md" />
+            你的身份
           </h3>
           <p className={`text-2xl font-semibold ${role === 'spy' && visible ? 'text-destructive' : ''}`}>
             {displayRole}
