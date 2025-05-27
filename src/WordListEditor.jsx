@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
-export default function WordListEditor({ current, onSelectList }) {
+export default function WordListEditor({ current, onSelectList, onBack }) {
   const [lists, setLists] = useState([])
   const [newList, setNewList] = useState('')
   const [items, setItems] = useState([])
@@ -106,6 +106,7 @@ export default function WordListEditor({ current, onSelectList }) {
             )}
           </div>
         )}
+        <button className="w-full text-base py-2 mt-2" onClick={onBack}>返回</button>
       </div>
     </div>
   )

@@ -15,6 +15,8 @@ export default function Room() {
   const [visible, setVisible]  = useState(false);
   const [phase,   setPhase]    = useState('lobby');
   const [summary, setSummary]  = useState(null);
+  const [wordListName, setWordListName] = useState('default');
+  const [showWordListEditor, setShowWordListEditor] = useState(false);
 
   const spyCount = 1;
   const isHost  = socket.id === room.host;
@@ -71,7 +73,7 @@ export default function Room() {
   return (
     <div className="card-center min-h-screen w-full flex flex-col items-center justify-center relative">
       <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
-      {phase === 'lobby' && (
+      {phase === 'lobby' && !showWordListEditor && (
         <div className="flex flex-col gap-4 w-full max-w-xl items-center">
           <input
             className="w-full text-base py-2 px-4"
@@ -87,6 +89,7 @@ export default function Room() {
           />
           <button className="w-full text-base py-2" onClick={createRoom}>创建房间</button>
           <button className="w-full text-base py-2" onClick={joinRoom}>加入房间</button>
+          <button className="w-full text-base py-2" onClick={()=>setShowWordListEditor(true)}>词库编辑</button>
           <div className="mb-8 w-full">
             <div className="text-2xl font-bold mb-2">玩家列表：</div>
             <ul className="text-xl font-bold text-sky-600">
@@ -112,6 +115,9 @@ export default function Room() {
             </div>
           )}
         </div>
+      )}
+      {showWordListEditor && (
+        <WordListEditor current={wordListName} onSelectList={name=>setWordListName(name)} onBack={()=>setShowWordListEditor(false)} />
       )}
       {phase === 'playing' && (
         <div className="w-full">
