@@ -119,6 +119,10 @@
   @apply h-2 w-2;
 }
 
+.icon-xxxs {
+  @apply h-1.5 w-1.5;
+}
+
 .page-center {
   @apply min-h-screen flex flex-col items-center justify-center bg-[#E8EDF4];
 }
