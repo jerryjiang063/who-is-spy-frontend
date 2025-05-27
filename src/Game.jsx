@@ -15,19 +15,19 @@ export default function Game({ word, role, visible }) {
     <div className="card animate-fade-in">
       <div className="p-6 space-y-6 text-center">
         <div>
-          <h3 className="title">
+          <h3 className="title mb-4">
             <DocumentTextIcon className="icon-md" />
             你的词语
           </h3>
-          <p className="text-3xl font-bold text-primary">{displayWord}</p>
+          <p className="text-2xl font-bold text-primary">{displayWord}</p>
         </div>
         
         <div>
-          <h3 className="title">
+          <h3 className="title mb-4">
             <UserCircleIcon className="icon-md" />
             你的身份
           </h3>
-          <p className={`text-2xl font-semibold ${role === 'spy' && visible ? 'text-destructive' : ''}`}>
+          <p className={`text-xl font-semibold ${role === 'spy' && visible ? 'text-destructive' : ''}`}>
             {displayRole}
           </p>
         </div>

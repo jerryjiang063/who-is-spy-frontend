@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 216 13% 94%;
+    --background: 210 50% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -54,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#E8EDF4] text-foreground;
+    @apply bg-[#F0F7FF] text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -72,7 +72,7 @@
 }
 
 .btn-lg {
-  @apply h-11 px-8 py-2;
+  @apply h-10 px-6 py-2;
 }
 
 .input {
@@ -96,17 +96,17 @@
 }
 
 .title {
-  @apply text-2xl font-bold mb-6 flex items-center justify-center gap-2;
+  @apply text-xl font-bold mb-6 flex items-center justify-center gap-2;
 }
 
 .icon-sm {
-  @apply h-4 w-4;
+  @apply h-3.5 w-3.5;
 }
 
 .icon-md {
-  @apply h-5 w-5;
+  @apply h-4 w-4;
 }
 
 .icon-lg {
-  @apply h-6 w-6;
+  @apply h-5 w-5;
 }
