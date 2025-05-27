@@ -68,12 +68,12 @@ export default function WordListEditor({ current, onSelectList }) {
   }
 
   return (
-    <div className="card-center animate-fade-in mb-6">
-      <h3 className="title">
-        <BookOpenIcon className="icon-xs" />
+    <div className="card-center animate-fade-in mb-6 text-center">
+      <h3 className="title text-center">
+        <BookOpenIcon className="icon-xxs" />
         词库管理
       </h3>
-      <div className="space-y-4 w-full">
+      <div className="space-y-4 w-full text-center">
         <div className="flex gap-2 w-full">
           <input
             className="input flex-1 text-center"
@@ -82,10 +82,10 @@ export default function WordListEditor({ current, onSelectList }) {
             onChange={e => setNewList(e.target.value)}
           />
           <button 
-            className="btn btn-primary flex items-center gap-2" 
+            className="btn btn-primary flex items-center gap-2 text-center" 
             onClick={createList}
           >
-            <PlusIcon className="icon-xs" />
+            <PlusIcon className="icon-xxs" />
             创建
           </button>
         </div>
@@ -101,50 +101,50 @@ export default function WordListEditor({ current, onSelectList }) {
             ))}
           </select>
           <button
-            className="btn btn-destructive flex items-center gap-2"
+            className="btn btn-destructive flex items-center gap-2 text-center"
             onClick={() => deleteList(current)}
           >
-            <TrashIcon className="icon-xs" />
+            <TrashIcon className="icon-xxs" />
             删除
           </button>
         </div>
         {current && (
-          <div className="space-y-4 w-full">
+          <div className="space-y-4 w-full text-center">
             <div className="flex justify-between items-center w-full">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <FolderIcon className="icon-xs text-primary" />
+              <h4 className="text-lg font-medium flex items-center gap-2 text-center">
+                <FolderIcon className="icon-xxs text-primary" />
                 词条列表：{current}
               </h4>
               <button
-                className="btn btn-secondary btn-sm flex items-center gap-1"
+                className="btn btn-secondary btn-sm flex items-center gap-1 text-center"
                 onClick={() => setShowItems(!showItems)}
               >
                 {showItems ? (
                   <>
-                    <ChevronUpIcon className="icon-xs" />
+                    <ChevronUpIcon className="icon-xxs" />
                     收起
                   </>
                 ) : (
                   <>
-                    <ChevronDownIcon className="icon-xs" />
+                    <ChevronDownIcon className="icon-xxs" />
                     展开
                   </>
                 )}
               </button>
             </div>
             {showItems && (
-              <div className="space-y-4 animate-slide-down w-full">
-                <div className="max-h-48 overflow-auto rounded-md border bg-secondary/20 w-full">
+              <div className="space-y-4 animate-slide-down w-full text-center">
+                <div className="max-h-48 overflow-auto rounded-md border bg-secondary/20 w-full text-center">
                   {items.length > 0 ? (
                     <div className="divide-y">
                       {items.map(i => (
-                        <div key={i} className="flex justify-between items-center p-2 hover:bg-secondary/30">
+                        <div key={i} className="flex justify-between items-center p-2 hover:bg-secondary/30 text-center">
                           <span>{i}</span>
                           <button
-                            className="text-destructive hover:text-destructive/70 p-1 rounded-full hover:bg-destructive/10 transition-colors"
+                            className="text-destructive hover:text-destructive/70 p-1 rounded-full hover:bg-destructive/10 transition-colors text-center"
                             onClick={() => delItem(i)}
                           >
-                            <TrashIcon className="icon-xs" />
+                            <TrashIcon className="icon-xxs" />
                           </button>
                         </div>
                       ))}
@@ -163,10 +163,10 @@ export default function WordListEditor({ current, onSelectList }) {
                     onChange={e => setNewItem(e.target.value)}
                   />
                   <button 
-                    className="btn btn-primary flex items-center gap-2" 
+                    className="btn btn-primary flex items-center gap-2 text-center" 
                     onClick={addItem}
                   >
-                    <PlusIcon className="icon-xs" />
+                    <PlusIcon className="icon-xxs" />
                     添加
                   </button>
                 </div>

@@ -115,10 +115,18 @@
   @apply h-3 w-3;
 }
 
+.icon-xxs {
+  @apply h-2 w-2;
+}
+
 .page-center {
   @apply min-h-screen flex flex-col items-center justify-center bg-[#E8EDF4];
 }
 
 .card-center {
   @apply flex flex-col items-center justify-center w-full max-w-md mx-auto text-center bg-white rounded-lg border shadow-sm p-6;
+}
+
+.text-center-all * {
+  @apply text-center;
 }
