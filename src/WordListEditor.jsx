@@ -12,6 +12,7 @@ export default function WordListEditor({ current, onSelectList, onBack }) {
   // 获取所有列表名
   const fetchLists = async () => {
     const res = await axios.get('/wordlists')
+    console.log('fetchLists 返回：', res.data); // 调试日志
     setLists(res.data)
   }
   // 获取当前选中列表的词条
