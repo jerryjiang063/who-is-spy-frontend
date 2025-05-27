@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle } from 'react-icons/ai';
-import socket from './socket';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
 import Vote from './Vote';
 import './index.css';
 
-export default function Room() {
+export default function Room({ socket }) {
   const [roomId,  setRoomId]   = useState('');
   const [name,    setName]     = useState('');
   const [room,    setRoom]     = useState({ host:null, listName:'default', players:[] });
@@ -56,7 +55,7 @@ export default function Room() {
       setPhase('finished');
     });
     return ()=>socket.off();
-  },[]);
+  },[socket]);
 
   useEffect(() => {
     function updateIsHost() {
@@ -67,7 +66,7 @@ export default function Room() {
     return () => {
       socket.off('connect', updateIsHost);
     };
-  }, [room.host]);
+  }, [room.host, socket]);
 
   // 自动填充房主端的房间号
   useEffect(() => {

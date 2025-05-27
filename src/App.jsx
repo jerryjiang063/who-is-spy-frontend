@@ -3,6 +3,7 @@ import React from 'react';
 import { ThemeProvider, useTheme } from 'next-themes';
 // import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'; // No longer needed
 import Room from './Room';
+import socket from './socket';
 import './index.css';
 
 function ThemeToggle() {
@@ -27,5 +28,5 @@ function ThemeToggle() {
 }
 
 export default function App() {
-  return <Room />;
+  return <Room socket={socket} />;
 }
