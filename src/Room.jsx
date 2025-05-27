@@ -44,7 +44,6 @@ export default function Room({ socket }) {
     };
     const onRoundSummary = ({ summary }) => {
       setSummary(summary);
-      setPhase('eliminated');
     };
     const onStartNextVote = () => {
       alert('本轮淘汰的是平民，游戏继续！');
@@ -177,7 +176,14 @@ export default function Room({ socket }) {
         </div>
       )}
       {showWordListEditor && (
-        <WordListEditor current={wordListName} onSelectList={name=>setWordListName(name)} onBack={()=>setShowWordListEditor(false)} />
+        <WordListEditor
+          current={wordListName}
+          onSelectList={name => {
+            setWordListName(name);
+            changeList(name);
+          }}
+          onBack={() => setShowWordListEditor(false)}
+        />
       )}
       {phase === 'playing' && (
         <div className="w-full">
@@ -229,13 +235,29 @@ export default function Room({ socket }) {
       {phase === 'finished' && (
         <div className="w-full">
           <h1 className="title text-center">游戏结束 🎉</h1>
+          {summary && (
+            <div className="space-y-2 mb-6">
+              <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
+              {Object.entries(summary).map(([pid, { word, role }]) => (
+                <div
+                  key={pid}
+                  className={`p-3 rounded-md text-center ${role === 'spy' ? 'bg-sky-100' : 'bg-white/40'}`}
+                >
+                  <span className={`text-center font-bold ${role === 'spy' ? 'text-red-400' : 'text-sky-500'}`}>
+                    {role === 'spy' ? '【卧底】' : '【平民】'}
+                  </span>
+                  <span className="text-center">{' '}{word} — {room.players.find(p => p.id === pid)?.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="w-full text-center">
-          <button
+            <button
               className="w-full text-base py-2"
-            onClick={resetGame}
-          >
-            返回大厅
-          </button>
+              onClick={resetGame}
+            >
+              返回大厅
+            </button>
           </div>
         </div>
       )}
