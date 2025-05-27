@@ -21,40 +21,59 @@ export default function Room({ socket }) {
   const spyCount = 1;
 
   useEffect(()=>{
-    socket.on('room-updated', data=>{
+    const onRoomUpdated = data => {
       setRoom(data);
       setPhase('lobby');
       setSummary(null);
-    });
-    socket.on('deal-words', ({ word, role })=>{
+    };
+    const onDealWords = ({ word, role }) => {
       setMyWord(word);
       setMyRole(role);
       setPhase('playing');
-    });
-    socket.on('visibility-updated', ({ visible })=>{
+    };
+    const onVisibilityUpdated = ({ visible }) => {
       setVisible(visible);
-    });
-    socket.on('vote-tie', ()=>{
+    };
+    const onVoteTie = () => {
       alert('本轮平局或弃权多数，重投！');
       setPhase('voting');
-    });
-    socket.on('spy-eliminated', ({ eliminatedId })=>{
+    };
+    const onSpyEliminated = ({ eliminatedId }) => {
       alert('卧底被票出，平民胜利！');
       setPhase('finished');
-    });
-    socket.on('round-summary', ({ summary })=>{
+    };
+    const onRoundSummary = ({ summary }) => {
       setSummary(summary);
       setPhase('eliminated');
-    });
-    socket.on('start-next-vote', ()=>{
+    };
+    const onStartNextVote = () => {
       alert('本轮淘汰的是平民，游戏继续！');
       setPhase('voting');
-    });
-    socket.on('spy-win', ()=>{
+    };
+    const onSpyWin = () => {
       alert('卧底胜利！');
       setPhase('finished');
-    });
-    return ()=>socket.off();
+    };
+
+    socket.on('room-updated', onRoomUpdated);
+    socket.on('deal-words', onDealWords);
+    socket.on('visibility-updated', onVisibilityUpdated);
+    socket.on('vote-tie', onVoteTie);
+    socket.on('spy-eliminated', onSpyEliminated);
+    socket.on('round-summary', onRoundSummary);
+    socket.on('start-next-vote', onStartNextVote);
+    socket.on('spy-win', onSpyWin);
+
+    return () => {
+      socket.off('room-updated', onRoomUpdated);
+      socket.off('deal-words', onDealWords);
+      socket.off('visibility-updated', onVisibilityUpdated);
+      socket.off('vote-tie', onVoteTie);
+      socket.off('spy-eliminated', onSpyEliminated);
+      socket.off('round-summary', onRoundSummary);
+      socket.off('start-next-vote', onStartNextVote);
+      socket.off('spy-win', onSpyWin);
+    };
   },[socket]);
 
   useEffect(() => {
