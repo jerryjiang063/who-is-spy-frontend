@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle } from 'react-icons/ai';
+import React, { useState, useEffect, useRef } from 'react';
+import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle, AiOutlineClose } from 'react-icons/ai';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
 import Vote from './Vote';
@@ -17,14 +17,29 @@ export default function Room({ socket }) {
   const [wordListName, setWordListName] = useState('default');
   const [showWordListEditor, setShowWordListEditor] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [roomStatus, setRoomStatus] = useState('waiting');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [waitingForGame, setWaitingForGame] = useState(false);
+  
+  const roomRef = useRef(room);
+  useEffect(() => {
+    roomRef.current = room;
+  }, [room]);
 
   const spyCount = 1;
 
   useEffect(()=>{
     const onRoomUpdated = data => {
       setRoom(data);
-      setPhase('lobby');
-      setSummary(null);
+      if (data.status) {
+        setRoomStatus(data.status);
+      }
+      if (data.status === 'waiting') {
+        if (waitingForGame) {
+          setPhase('lobby');
+          setWaitingForGame(false);
+        }
+      }
     };
     const onDealWords = ({ word, role }) => {
       setMyWord(word);
@@ -44,14 +59,30 @@ export default function Room({ socket }) {
     };
     const onRoundSummary = ({ summary }) => {
       setSummary(summary);
+      setPhase('eliminated');
     };
     const onStartNextVote = () => {
-      alert('本轮淘汰的是平民，游戏继续！');
-      setPhase('voting');
+      const currentRoom = roomRef.current;
+      const isPlayerAlive = currentRoom.players.find(p => p.id === socket.id)?.alive;
+      if (isPlayerAlive) {
+        alert('本轮淘汰的是平民，游戏继续！');
+        setPhase('voting');
+      }
     };
     const onSpyWin = () => {
       alert('卧底胜利！');
       setPhase('finished');
+    };
+    
+    const onRoomExists = () => {
+      setErrorMsg('该房间已存在，请加入或选择其他房间名');
+      setTimeout(() => setErrorMsg(''), 3000);
+    };
+    
+    const onKickedFromRoom = () => {
+      alert('你已被房主移出房间');
+      setPhase('lobby');
+      setRoom({ host:null, listName:'default', players:[] });
     };
 
     socket.on('room-updated', onRoomUpdated);
@@ -62,6 +93,8 @@ export default function Room({ socket }) {
     socket.on('round-summary', onRoundSummary);
     socket.on('start-next-vote', onStartNextVote);
     socket.on('spy-win', onSpyWin);
+    socket.on('room-exists', onRoomExists);
+    socket.on('kicked-from-room', onKickedFromRoom);
 
     return () => {
       socket.off('room-updated', onRoomUpdated);
@@ -72,6 +105,8 @@ export default function Room({ socket }) {
       socket.off('round-summary', onRoundSummary);
       socket.off('start-next-vote', onStartNextVote);
       socket.off('spy-win', onSpyWin);
+      socket.off('room-exists', onRoomExists);
+      socket.off('kicked-from-room', onKickedFromRoom);
     };
   },[socket]);
 
@@ -86,7 +121,6 @@ export default function Room({ socket }) {
     };
   }, [room.host, socket]);
 
-  // 自动填充房主端的房间号
   useEffect(() => {
     if (room && room.id && !roomId) {
       setRoomId(room.id);
@@ -96,7 +130,36 @@ export default function Room({ socket }) {
   const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
   const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
   const changeList    = ln=>socket.emit('change-list',{ roomId,listName:ln });
-  const resetGame     = ()=>{ setPhase('lobby'); socket.emit('reset-game',{ roomId }); };
+  
+  const resetGame = () => {
+    setPhase('lobby');
+    socket.emit('reset-game', { roomId });
+  };
+  
+  const leaveRoom = () => {
+    socket.emit('check-room-status', { roomId }, (response) => {
+      if (response.exists) {
+        if (response.status === 'playing') {
+          setWaitingForGame(true);
+          setPhase('waiting');
+        } else {
+          socket.emit('leave-room', { roomId });
+          setPhase('lobby');
+          setRoom({ host:null, listName:'default', players:[] });
+        }
+      } else {
+        setPhase('lobby');
+        setRoom({ host:null, listName:'default', players:[] });
+      }
+    });
+  };
+  
+  const kickPlayer = (playerId) => {
+    if (isHost && socket.id !== playerId) {
+      socket.emit('kick-player', { roomId, playerId });
+    }
+  };
+  
   const startGame     = ()=>{
     console.log('startGame called', { roomId, isHost, players: room.players });
     if (!roomId) {
@@ -122,9 +185,31 @@ export default function Room({ socket }) {
     return () => { document.body.style.background = '#B3E5FC'; };
   }, []);
 
+  const isReturnButtonDisabled = phase === 'eliminated' && roomStatus === 'playing';
+
   return (
     <div className="card-center min-h-screen w-full flex flex-col items-center justify-center relative">
       <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
+      
+      {errorMsg && (
+        <div className="w-full bg-red-100 text-red-800 p-2 rounded mb-4 text-center">
+          {errorMsg}
+        </div>
+      )}
+      
+      {phase === 'waiting' && (
+        <div className="w-full text-center">
+          <h2 className="text-2xl mb-6">当前房间正在游戏中，请稍后</h2>
+          <button className="w-full text-base py-2" onClick={() => {
+            setWaitingForGame(false);
+            setPhase('lobby');
+            setRoom({ host:null, listName:'default', players:[] });
+          }}>
+            返回主页
+          </button>
+        </div>
+      )}
+      
       {phase === 'lobby' && !showWordListEditor && (
         <div className="flex flex-col gap-4 w-full max-w-xl items-center">
             <input
@@ -146,7 +231,17 @@ export default function Room({ socket }) {
             <div className="text-2xl font-bold mb-2">玩家列表：</div>
             <ul className="text-xl font-bold text-sky-600">
               {room.players.map((p) => (
-                <li key={p.id}>{p.name}</li>
+                <li key={p.id} className="flex justify-between items-center">
+                  <span>{p.name}</span>
+                  {isHost && p.id !== socket.id && (
+                    <button 
+                      className="text-red-500 hover:text-red-700 text-sm"
+                      onClick={() => kickPlayer(p.id)}
+                    >
+                      <AiOutlineClose /> 移出
+                    </button>
+                  )}
+                </li>
               ))}
             </ul>
             <div className="text-xs text-sky-400 mt-2">
@@ -195,12 +290,26 @@ export default function Room({ socket }) {
             >
               开始投票
             </button>
+            <button
+              className="w-full text-base py-2 mt-2"
+              onClick={leaveRoom}
+            >
+              返回大厅
+            </button>
           </div>
         </div>
       )}
       {phase === 'voting' && (
         <div className="w-full">
-        <Vote roomId={roomId} players={room.players}/>
+          <Vote roomId={roomId} players={room.players}/>
+          <div className="mt-4 text-center w-full">
+            <button
+              className="w-full text-base py-2"
+              onClick={leaveRoom}
+            >
+              返回大厅
+            </button>
+          </div>
         </div>
       )}
       {phase === 'eliminated' && (
@@ -224,10 +333,11 @@ export default function Room({ socket }) {
             ))}
             </div>
           <button
-              className="w-full text-base py-2"
-            onClick={resetGame}
+              className={`w-full text-base py-2 ${isReturnButtonDisabled ? 'bg-gray-300 cursor-not-allowed opacity-50' : ''}`}
+              onClick={leaveRoom}
+              disabled={isReturnButtonDisabled}
           >
-            返回大厅
+            {isReturnButtonDisabled ? '请等待游戏结束' : '返回大厅'}
           </button>
           </div>
         </div>
@@ -252,12 +362,12 @@ export default function Room({ socket }) {
             </div>
           )}
           <div className="w-full text-center">
-            <button
+          <button
               className="w-full text-base py-2"
-              onClick={resetGame}
-            >
-              返回大厅
-            </button>
+            onClick={resetGame}
+          >
+            返回大厅
+          </button>
           </div>
         </div>
       )}
