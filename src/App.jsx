@@ -30,12 +30,26 @@ function ThemeToggle() {
 }
 
 function Footer() {
+  const footerStyle = {
+    position: 'fixed',
+    bottom: '8px',
+    left: '0',
+    width: '100%',
+    textAlign: 'center',
+    fontSize: '0.85rem',
+    color: '#1976d2',
+    fontWeight: 'bold',
+    opacity: '0.8',
+    zIndex: 50,
+    userSelect: 'none'
+  };
+
   return (
-    <footer className="fixed bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none z-50">
+    <div style={footerStyle}>
       {isFigLang 
         ? "By Jerry Jiang | Who Is Spy Online | 2025"
         : "By 姜姜大当家 | 谁是卧底在线版 | 2025"}
-    </footer>
+    </div>
   );
 }
 
