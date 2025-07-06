@@ -28,6 +28,40 @@ axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.timeout = 10000; // 设置10秒超时
+
+// 创建一个带有重试功能的axios实例
+export const axiosWithRetry = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
+// 添加重试功能
+axiosWithRetry.interceptors.response.use(null, async (error) => {
+  const { config } = error;
+  
+  // 如果没有配置或已经重试过，直接拒绝
+  if (!config || config._retryCount >= 2) {
+    return Promise.reject(error);
+  }
+  
+  // 设置重试计数
+  config._retryCount = config._retryCount || 0;
+  config._retryCount += 1;
+  
+  console.log(`请求失败，正在重试 (${config._retryCount}/2): ${config.url}`);
+  
+  // 延迟重试
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // 重新发送请求
+  return axiosWithRetry(config);
+});
 
 // 添加 axios 请求拦截器，用于调试和修复 URL
 axios.interceptors.request.use(request => {
@@ -52,17 +86,7 @@ axios.interceptors.request.use(request => {
   }
   
   // 记录请求信息
-  console.log('Starting Request', {
-    url: request.url,
-    method: request.method,
-    baseURL: request.baseURL,
-    fullURL: typeof request.url === 'string' 
-      ? (request.url.startsWith('http') 
-          ? request.url 
-          : (request.baseURL || '') + (request.url.startsWith('/') ? request.url : '/' + request.url))
-      : 'Invalid URL',
-    headers: request.headers
-  });
+  console.log('Starting Request Object');
   
   return request;
 });
@@ -70,11 +94,7 @@ axios.interceptors.request.use(request => {
 // 添加 axios 响应拦截器，用于调试
 axios.interceptors.response.use(
   response => {
-    console.log('Response:', {
-      status: response.status,
-      url: response.config.url,
-      data: response.data
-    });
+    console.log('Response Object');
     return response;
   },
   error => {
@@ -89,6 +109,25 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 同样为axiosWithRetry添加拦截器
+axiosWithRetry.interceptors.request.use(request => {
+  // 确保 baseURL 正确应用
+  if (window.location.hostname !== 'localhost' && 
+      (request.url.includes('localhost') || 
+      (typeof request.url === 'string' && !request.url.startsWith('http') && !request.url.startsWith('/')))) {
+    
+    if (typeof request.url === 'string') {
+      if (request.url.startsWith('http://localhost:3001')) {
+        request.url = request.url.replace('http://localhost:3001', API_BASE_URL);
+      } else if (!request.url.startsWith('http') && !request.url.startsWith('/')) {
+        request.url = '/' + request.url;
+      }
+    }
+  }
+  
+  return request;
+});
 
 // 创建 socket 连接
 let socketURL;
@@ -105,4 +144,23 @@ else {
 console.log('Setting socket URL to:', socketURL);
 
 // 创建并导出 socket 连接
-export default io(socketURL);
+const socket = io(socketURL, {
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  timeout: 10000
+});
+
+// 添加连接事件监听
+socket.on('connect', () => {
+  console.log('Socket connected successfully');
+});
+
+socket.on('connect_error', (error) => {
+  console.error('Socket connection error:', error);
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', reason);
+});
+
+export default socket;

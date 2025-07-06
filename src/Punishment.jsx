@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { AiOutlineCheckCircle, AiOutlineCloseCircle } from 'react-icons/ai';
-import { isFigLang } from './socket';
+import { isFigLang, axiosWithRetry } from './socket';
 import './index.css';
 
 export default function Punishment({ socket, roomId, onCompleted }) {
@@ -10,6 +9,7 @@ export default function Punishment({ socket, roomId, onCompleted }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // 获取随机题目
   const fetchRandomQuestion = async () => {
@@ -18,11 +18,22 @@ export default function Punishment({ socket, roomId, onCompleted }) {
     setSelectedOption(null);
     
     try {
-      const response = await axios.get('/quiz/random');
+      // 使用带有重试功能的axios实例
+      const response = await axiosWithRetry.get('/quiz/random');
       setQuestion(response.data);
       setError(null);
+      setRetryCount(0); // 重置重试计数
     } catch (err) {
       console.error('Error fetching question:', err);
+      
+      // 如果重试次数小于3，则自动重试
+      if (retryCount < 3) {
+        console.log(`自动重试获取题目 (${retryCount + 1}/3)`);
+        setRetryCount(prev => prev + 1);
+        setTimeout(fetchRandomQuestion, 1000);
+        return;
+      }
+      
       setError(isFigLang ? 'Failed to fetch question. Please try again.' : '获取题目失败，请重试');
     } finally {
       setLoading(false);
@@ -34,7 +45,8 @@ export default function Punishment({ socket, roomId, onCompleted }) {
     if (selectedOption === null || !question) return;
     
     try {
-      const response = await axios.post('/quiz/submit', {
+      // 使用带有重试功能的axios实例
+      const response = await axiosWithRetry.post('/quiz/submit', {
         questionId: question.id,
         answer: selectedOption
       });
@@ -65,7 +77,11 @@ export default function Punishment({ socket, roomId, onCompleted }) {
     return (
       <div className="card-center">
         <h2 className="text-3xl mb-6">{isFigLang ? "Punishment Phase" : "惩罚环节"}</h2>
-        <div className="text-xl">{isFigLang ? "Loading question..." : "加载题目中..."}</div>
+        <div className="text-xl">
+          {isFigLang 
+            ? `Loading question${retryCount > 0 ? ` (retry ${retryCount}/3)` : ''}...` 
+            : `加载题目中${retryCount > 0 ? ` (重试 ${retryCount}/3)` : ''}...`}
+        </div>
       </div>
     );
   }
@@ -76,7 +92,10 @@ export default function Punishment({ socket, roomId, onCompleted }) {
       <div className="card-center">
         <h2 className="text-3xl mb-6">{isFigLang ? "Punishment Phase" : "惩罚环节"}</h2>
         <div className="text-xl text-red-500 mb-4">{error}</div>
-        <button className="w-full text-base py-2" onClick={fetchRandomQuestion}>
+        <button className="w-full text-base py-2" onClick={() => {
+          setRetryCount(0);
+          fetchRandomQuestion();
+        }}>
           {isFigLang ? "Retry" : "重试"}
         </button>
       </div>
