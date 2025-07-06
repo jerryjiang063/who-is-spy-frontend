@@ -5,7 +5,8 @@ import Game from './Game';
 import Vote from './Vote';
 import Punishment from './Punishment';
 import QuestionMode from './QuestionMode';
-import { isFigLang } from './socket';
+import { isFigLang, baseURL } from './socket';
+import axios from 'axios';
 import './index.css';
 
 export default function Room({ socket, title = '《谁是卧底》在线版', defaultWordList = 'default' }) {
@@ -213,9 +214,11 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   useEffect(() => {
     const fetchWordLists = async () => {
       try {
-        const response = await fetch('http://localhost:3001/wordlists');
-        const data = await response.json();
-        setWordLists(data);
+        console.log('Fetching word lists from:', `${baseURL}/wordlists`);
+        // 使用 axios 和 baseURL 确保一致的 API 地址
+        const response = await axios.get(`${baseURL}/wordlists`);
+        console.log('Word lists fetched successfully:', response.data);
+        setWordLists(response.data);
       } catch (error) {
         console.error('获取词库列表失败:', error);
       }
