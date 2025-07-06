@@ -24,6 +24,22 @@ export default function Punishment({ socket, roomId, onCompleted }) {
       
       // 使用带有重试功能的axios实例，并传递playerId参数
       const response = await axiosWithRetry.get(`/quiz/random?playerId=${playerId}&timestamp=${Date.now()}`);
+      
+      // 检查是否已回答所有题目
+      if (response.data.allCompleted) {
+        console.log('All questions completed');
+        setError(null);
+        setLoading(false);
+        
+        // 显示完成信息并返回大厅
+        if (onCompleted) {
+          onCompleted(response.data.message);
+        } else {
+          socket.emit('punishment-completed', { roomId });
+        }
+        return;
+      }
+      
       setQuestion(response.data);
       setError(null);
       setRetryCount(0); // 重置重试计数
@@ -52,7 +68,8 @@ export default function Punishment({ socket, roomId, onCompleted }) {
       // 使用带有重试功能的axios实例
       const response = await axiosWithRetry.post('/quiz/submit', {
         questionId: question.id,
-        answer: selectedOption
+        answer: selectedOption,
+        playerId: socket.id // 添加玩家ID
       });
       
       setResult(response.data);

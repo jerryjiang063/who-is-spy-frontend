@@ -24,6 +24,22 @@ export default function QuestionMode({ onBack }) {
       
       // 使用带有重试功能的axios实例，并传递playerId参数
       const response = await axiosWithRetry.get(`/quiz/random?playerId=${playerId}&timestamp=${Date.now()}`);
+      
+      // 检查是否已回答所有题目
+      if (response.data.allCompleted) {
+        console.log('All questions completed');
+        setQuestion(null);
+        setError(null);
+        setLoading(false);
+        
+        // 显示完成消息
+        setResult({
+          allCompleted: true,
+          message: response.data.message
+        });
+        return;
+      }
+      
       setQuestion(response.data);
       setError(null);
     } catch (err) {
@@ -41,7 +57,8 @@ export default function QuestionMode({ onBack }) {
     try {
       const response = await axiosWithRetry.post(`/quiz/submit`, {
         questionId: question.id,
-        answer: selectedOption
+        answer: selectedOption,
+        playerId: playerId // 添加玩家ID
       });
       
       setResult(response.data);
@@ -79,6 +96,32 @@ export default function QuestionMode({ onBack }) {
         <div className="text-xl text-red-500 mb-4">{error}</div>
         <button className="w-full text-base py-2" onClick={fetchRandomQuestion}>
           Retry
+        </button>
+      </div>
+    );
+  }
+
+  // 渲染所有题目已完成状态
+  if (result && result.allCompleted) {
+    return (
+      <div className="card-center">
+        <h2 className="text-3xl mb-6">Question Answering Mode</h2>
+        <div className="bg-green-100 p-4 rounded-lg mb-6">
+          <div className="flex items-center">
+            <AiOutlineCheckCircle className="text-green-500 text-2xl mr-2" />
+            <span className="text-green-700 font-bold">
+              {result.message}
+            </span>
+          </div>
+        </div>
+        <div className="text-lg mb-6">
+          Final Score: {correctCount}/{answeredCount}
+        </div>
+        <button 
+          onClick={onBack}
+          className="w-full flex items-center justify-center"
+        >
+          <AiOutlineArrowLeft className="mr-2" /> Return to Lobby
         </button>
       </div>
     );
