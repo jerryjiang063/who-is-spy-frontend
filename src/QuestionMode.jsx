@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineArrowLeft } from 'react-icons/ai';
-import { isFigLang, baseURL } from './socket';
+import { isFigLang, baseURL, axiosWithRetry } from './socket';
 import './index.css';
 
 export default function QuestionMode({ onBack }) {
@@ -12,6 +11,7 @@ export default function QuestionMode({ onBack }) {
   const [error, setError] = useState(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+  const [playerId, setPlayerId] = useState(`user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
 
   // 获取随机题目
   const fetchRandomQuestion = async () => {
@@ -20,13 +20,10 @@ export default function QuestionMode({ onBack }) {
     setSelectedOption(null);
     
     try {
-      const response = await axios.get(`${baseURL}/quiz/random`, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
+      console.log(`Fetching question for player: ${playerId}`);
+      
+      // 使用带有重试功能的axios实例，并传递playerId参数
+      const response = await axiosWithRetry.get(`/quiz/random?playerId=${playerId}&timestamp=${Date.now()}`);
       setQuestion(response.data);
       setError(null);
     } catch (err) {
@@ -42,15 +39,9 @@ export default function QuestionMode({ onBack }) {
     if (selectedOption === null || !question) return;
     
     try {
-      const response = await axios.post(`${baseURL}/quiz/submit`, {
+      const response = await axiosWithRetry.post(`/quiz/submit`, {
         questionId: question.id,
         answer: selectedOption
-      }, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
       });
       
       setResult(response.data);

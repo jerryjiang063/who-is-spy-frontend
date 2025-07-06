@@ -18,8 +18,12 @@ export default function Punishment({ socket, roomId, onCompleted }) {
     setSelectedOption(null);
     
     try {
-      // 使用带有重试功能的axios实例
-      const response = await axiosWithRetry.get('/quiz/random');
+      // 使用socket.id作为玩家唯一标识
+      const playerId = socket.id;
+      console.log(`Fetching question for player: ${playerId}`);
+      
+      // 使用带有重试功能的axios实例，并传递playerId参数
+      const response = await axiosWithRetry.get(`/quiz/random?playerId=${playerId}&timestamp=${Date.now()}`);
       setQuestion(response.data);
       setError(null);
       setRetryCount(0); // 重置重试计数
