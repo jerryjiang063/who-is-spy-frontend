@@ -9,33 +9,48 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
   const [items, setItems] = useState([])
   const [newItem, setNewItem] = useState('')
   const [showItems, setShowItems] = useState(true)
+  const [error, setError] = useState(null)
 
   // 获取所有列表名
   const fetchLists = async () => {
-    const res = await axios.get('/wordlists')
-    console.log('fetchLists 返回：', res.data); // 调试日志
-    
-    // 如果传入了过滤后的词库列表，则使用它
-    if (filteredWordLists) {
-      setLists(filteredWordLists);
-    } else {
-      // 否则过滤词库列表，如果不是 figurativelanguage 域名，则不显示 figurative_language 词库
-      const filtered = res.data.filter(list => {
-        if (isFigLang) {
-          // 在 figurativelanguage 域名下只显示 figurative_language 词库
-          return list === 'figurative_language';
-        } else {
-          // 在普通域名下不显示 figurative_language 词库
-          return list !== 'figurative_language';
-        }
-      });
-      setLists(filtered);
+    try {
+      console.log('Attempting to fetch wordlists from:', axios.defaults.baseURL + '/wordlists');
+      const res = await axios.get('/wordlists');
+      console.log('fetchLists 返回：', res.data); // 调试日志
+      
+      // 如果传入了过滤后的词库列表，则使用它
+      if (filteredWordLists) {
+        setLists(filteredWordLists);
+      } else {
+        // 否则过滤词库列表，如果不是 figurativelanguage 域名，则不显示 figurative_language 词库
+        const filtered = res.data.filter(list => {
+          if (isFigLang) {
+            // 在 figurativelanguage 域名下只显示 figurative_language 词库
+            return list === 'figurative_language';
+          } else {
+            // 在普通域名下不显示 figurative_language 词库
+            return list !== 'figurative_language';
+          }
+        });
+        setLists(filtered);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('获取词库列表失败:', err);
+      setError('获取词库列表失败: ' + (err.message || '未知错误'));
     }
   }
+  
   // 获取当前选中列表的词条
   const fetchItems = async name => {
-    const res = await axios.get(`/wordlists/${name}`)
-    setItems(res.data)
+    try {
+      const res = await axios.get(`/wordlists/${name}`)
+      setItems(res.data)
+      setError(null);
+    } catch (err) {
+      console.error(`获取词库 ${name} 的词条失败:`, err);
+      setError(`获取词库 ${name} 的词条失败: ` + (err.message || '未知错误'));
+    }
   }
 
   useEffect(() => { 
@@ -58,10 +73,16 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
       return;
     }
     
-    await axios.post('/wordlists', { name: newList.trim() })
-    setNewList('')
-    fetchLists()
+    try {
+      await axios.post('/wordlists', { name: newList.trim() })
+      setNewList('')
+      fetchLists()
+    } catch (err) {
+      console.error('创建词库失败:', err);
+      setError('创建词库失败: ' + (err.message || '未知错误'));
+    }
   }
+  
   const deleteList = async name => {
     // 在 figurativelanguage 域名下不允许删除词库
     if (isFigLang) {
@@ -69,24 +90,46 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
       return;
     }
     
-    await axios.delete(`/wordlists/${name}`)
-    onSelectList('default')
-    fetchLists()
+    try {
+      await axios.delete(`/wordlists/${name}`)
+      onSelectList('default')
+      fetchLists()
+    } catch (err) {
+      console.error(`删除词库 ${name} 失败:`, err);
+      setError(`删除词库 ${name} 失败: ` + (err.message || '未知错误'));
+    }
   }
+  
   const addItem = async () => {
     if (!newItem.trim()) return
-    await axios.post(`/wordlists/${current}/items`, { item: newItem.trim() })
-    setNewItem('')
-    fetchItems(current)
+    try {
+      await axios.post(`/wordlists/${current}/items`, { item: newItem.trim() })
+      setNewItem('')
+      fetchItems(current)
+    } catch (err) {
+      console.error(`添加词条到词库 ${current} 失败:`, err);
+      setError(`添加词条到词库 ${current} 失败: ` + (err.message || '未知错误'));
+    }
   }
+  
   const delItem = async item => {
-    await axios.delete(`/wordlists/${current}/items`, { params: { item } })
-    fetchItems(current)
+    try {
+      await axios.delete(`/wordlists/${current}/items`, { params: { item } })
+      fetchItems(current)
+    } catch (err) {
+      console.error(`从词库 ${current} 删除词条 ${item} 失败:`, err);
+      setError(`从词库 ${current} 删除词条 ${item} 失败: ` + (err.message || '未知错误'));
+    }
   }
 
   return (
     <div className="card-center w-full flex flex-col items-center justify-center">
       <h2 className="text-4xl mb-6">{isFigLang ? "Word List Editor" : "词库编辑"}</h2>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 w-full max-w-lg">
+          <p>{error}</p>
+        </div>
+      )}
       <div className="flex flex-col gap-4 w-full max-w-lg items-center">
         {!isFigLang && (
           <div className="flex gap-2 w-full">
