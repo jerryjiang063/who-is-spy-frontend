@@ -8,7 +8,7 @@ export const isFigLang = window.location.hostname.includes('figurativelanguage')
 
 // 设置 API 基础 URL
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.spyccb.top'
+  ? window.location.origin  // 使用当前域名
   : 'http://localhost:3001';
 
 // 配置 axios 默认 baseURL
@@ -23,7 +23,7 @@ if (window.location.hostname === 'localhost') {
 } 
 // 生产环境
 else {
-  socketURL = API_BASE_URL;
+  socketURL = window.location.origin;  // 使用当前域名
 }
 
 // 创建并导出 socket 连接
