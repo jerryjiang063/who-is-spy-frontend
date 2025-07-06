@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle, AiOutlineClose } from 'react-icons/ai';
+import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlayCircle, AiOutlineClose, AiOutlineQuestionCircle } from 'react-icons/ai';
 import WordListEditor from './WordListEditor';
 import Game from './Game';
 import Vote from './Vote';
 import Punishment from './Punishment';
+import QuestionMode from './QuestionMode';
 import { isFigLang } from './socket';
 import './index.css';
 
@@ -26,6 +27,7 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   const [spyCount, setSpyCount] = useState(1);
   const [wordLists, setWordLists] = useState([]);
   const [selectedList, setSelectedList] = useState('default');
+  const [inQuestionMode, setInQuestionMode] = useState(false);
   
   const roomRef = useRef(room);
   useEffect(() => {
@@ -301,6 +303,21 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     setPhase('lobby');
   };
 
+  // 进入问答模式
+  const enterQuestionMode = () => {
+    setInQuestionMode(true);
+  };
+
+  // 退出问答模式
+  const exitQuestionMode = () => {
+    setInQuestionMode(false);
+  };
+
+  // 如果在问答模式，显示问答组件
+  if (inQuestionMode) {
+    return <QuestionMode onBack={exitQuestionMode} />;
+  }
+
   // 根据当前阶段渲染不同的内容
   if (phase === 'waiting') {
     return (
@@ -357,6 +374,16 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
                   <AiOutlineHome className="mr-2" /> {isFigLang ? "Join Room" : "加入房间"}
                 </button>
               </div>
+              
+              {/* 只在figurativelanguage子域名下显示问答模式按钮 */}
+              {isFigLang && (
+                <button 
+                  onClick={enterQuestionMode} 
+                  className="w-full mt-4 bg-blue-100 hover:bg-blue-200 text-blue-800 flex items-center justify-center"
+                >
+                  <AiOutlineQuestionCircle className="mr-2" /> Question Answering Mode
+                </button>
+              )}
             </div>
           </>
         ) : (
@@ -461,7 +488,19 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
                 </div>
               )}
               
-              <button onClick={leaveRoom} className="w-full">{isFigLang ? "Leave Room" : "离开房间"}</button>
+              <div className="flex gap-2">
+                <button onClick={leaveRoom} className="w-full">{isFigLang ? "Leave Room" : "离开房间"}</button>
+                
+                {/* 只在figurativelanguage子域名下显示问答模式按钮 */}
+                {isFigLang && (
+                  <button 
+                    onClick={enterQuestionMode} 
+                    className="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 flex items-center justify-center"
+                  >
+                    <AiOutlineQuestionCircle className="mr-2" /> Question Mode
+                  </button>
+                )}
+              </div>
             </div>
             
             {/* 词库编辑器 */}
