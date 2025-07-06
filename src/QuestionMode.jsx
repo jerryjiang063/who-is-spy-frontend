@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineArrowLeft } from 'react-icons/ai';
-import { isFigLang } from './socket';
+import { isFigLang, baseURL } from './socket';
 import './index.css';
 
 export default function QuestionMode({ onBack }) {
@@ -20,7 +20,13 @@ export default function QuestionMode({ onBack }) {
     setSelectedOption(null);
     
     try {
-      const response = await axios.get('/quiz/random');
+      const response = await axios.get(`${baseURL}/quiz/random`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       setQuestion(response.data);
       setError(null);
     } catch (err) {
@@ -36,9 +42,15 @@ export default function QuestionMode({ onBack }) {
     if (selectedOption === null || !question) return;
     
     try {
-      const response = await axios.post('/quiz/submit', {
+      const response = await axios.post(`${baseURL}/quiz/submit`, {
         questionId: question.id,
         answer: selectedOption
+      }, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       
       setResult(response.data);

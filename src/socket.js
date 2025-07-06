@@ -11,8 +11,14 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? window.location.origin  // 使用当前域名
   : 'http://localhost:3001';
 
+// 导出 baseURL 供其他组件使用
+export const baseURL = API_BASE_URL;
+
 // 配置 axios 默认 baseURL
 axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.headers.common['Accept'] = 'application/json';
 
 // 创建 socket 连接
 let socketURL;
