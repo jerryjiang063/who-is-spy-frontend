@@ -1,7 +1,7 @@
 // src/WordListEditor.jsx
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { isFigLang } from './socket'
+import { isFigLang, baseURL } from './socket'
 
 export default function WordListEditor({ current, onSelectList, onBack, filteredWordLists }) {
   const [lists, setLists] = useState([])
@@ -14,8 +14,10 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
   // 获取所有列表名
   const fetchLists = async () => {
     try {
-      console.log('Attempting to fetch wordlists from:', axios.defaults.baseURL + '/wordlists');
-      const res = await axios.get('/wordlists');
+      // 使用 baseURL 确保正确的 API 地址
+      const apiUrl = `${baseURL}/wordlists`;
+      console.log('Attempting to fetch wordlists from:', apiUrl);
+      const res = await axios.get(apiUrl);
       console.log('fetchLists 返回：', res.data); // 调试日志
       
       // 如果传入了过滤后的词库列表，则使用它
@@ -44,7 +46,9 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
   // 获取当前选中列表的词条
   const fetchItems = async name => {
     try {
-      const res = await axios.get(`/wordlists/${name}`)
+      const apiUrl = `${baseURL}/wordlists/${name}`;
+      console.log(`Attempting to fetch items for wordlist "${name}" from:`, apiUrl);
+      const res = await axios.get(apiUrl);
       setItems(res.data)
       setError(null);
     } catch (err) {
@@ -74,7 +78,8 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
     }
     
     try {
-      await axios.post('/wordlists', { name: newList.trim() })
+      const apiUrl = `${baseURL}/wordlists`;
+      await axios.post(apiUrl, { name: newList.trim() });
       setNewList('')
       fetchLists()
     } catch (err) {
@@ -91,7 +96,8 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
     }
     
     try {
-      await axios.delete(`/wordlists/${name}`)
+      const apiUrl = `${baseURL}/wordlists/${name}`;
+      await axios.delete(apiUrl);
       onSelectList('default')
       fetchLists()
     } catch (err) {
@@ -103,7 +109,8 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
   const addItem = async () => {
     if (!newItem.trim()) return
     try {
-      await axios.post(`/wordlists/${current}/items`, { item: newItem.trim() })
+      const apiUrl = `${baseURL}/wordlists/${current}/items`;
+      await axios.post(apiUrl, { item: newItem.trim() });
       setNewItem('')
       fetchItems(current)
     } catch (err) {
@@ -114,7 +121,8 @@ export default function WordListEditor({ current, onSelectList, onBack, filtered
   
   const delItem = async item => {
     try {
-      await axios.delete(`/wordlists/${current}/items`, { params: { item } })
+      const apiUrl = `${baseURL}/wordlists/${current}/items`;
+      await axios.delete(apiUrl, { params: { item } });
       fetchItems(current)
     } catch (err) {
       console.error(`从词库 ${current} 删除词条 ${item} 失败:`, err);
