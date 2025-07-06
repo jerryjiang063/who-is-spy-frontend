@@ -37,6 +37,8 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
 
   useEffect(()=>{
     const onRoomUpdated = data => {
+      console.log('Room updated received:', data);
+      
       setRoom(data);
       if (data.status) {
         setRoomStatus(data.status);
@@ -46,6 +48,15 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
           setPhase('lobby');
           setWaitingForGame(false);
         }
+      }
+      
+      // 确保在 figurativelanguage 域名下使用 figurative_language 词库
+      if (isFigLang && data.listName !== 'figurative_language' && data.status === 'waiting') {
+        console.log('Room updated with incorrect list name, changing to figurative_language');
+        // 延迟一点执行，确保房间状态已更新
+        setTimeout(() => {
+          changeList('figurative_language');
+        }, 500);
       }
       
       if (isFigLang) {
@@ -236,7 +247,16 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     };
     
     fetchWordLists();
-  }, [isFigLang, room]);
+  }, [isFigLang, room, room.id, room.listName, baseURL]);
+
+  // 同步 room.listName 到 wordListName 状态
+  useEffect(() => {
+    if (room && room.listName) {
+      console.log(`Syncing wordListName state with room.listName: ${room.listName}`);
+      setWordListName(room.listName);
+      setSelectedList(room.listName);
+    }
+  }, [room, room.listName]);
 
   // 根据当前域名过滤词库
   const filteredWordLists = wordLists.filter(list => {
@@ -252,11 +272,21 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
   const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
   const changeList    = ln=>{
+    console.log(`Changing word list to: ${ln}`);
+    
     if (ln === 'figurative_language' && !isFigLang) {
       alert('该词库为特殊词库，请在figurativelanguage.spyccb.top中使用。');
       return;
     }
-    socket.emit('change-list',{ roomId,listName:ln });
+    
+    // 更新本地状态，提前反映变化
+    setSelectedList(ln);
+    
+    // 发送更改请求到服务器
+    socket.emit('change-list',{ roomId, listName:ln });
+    
+    // 打印确认日志
+    console.log(`Word list change request sent for: ${ln}`);
   };
   
   const resetGame = () => {
@@ -309,11 +339,26 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     // 确保在 figurativelanguage 域名下使用 figurative_language 词库
     if (isFigLang && room.listName !== 'figurative_language') {
       console.log('Forcing figurative_language list before starting game');
+      
+      // 先更改词库，等待确认更改成功后再开始游戏
       changeList('figurative_language');
+      
+      // 使用更长的延时，确保服务器有足够时间处理词库更改
       setTimeout(() => {
-        console.log('Starting game with list:', room.listName);
-        socket.emit('start-game', { roomId, spyCount });
-      }, 500); // 给changeList一点时间生效
+        // 再次检查词库是否已更改
+        if (room.listName !== 'figurative_language') {
+          console.warn('List name still not updated to figurative_language, forcing it again');
+          // 如果还没更改，再次尝试更改
+          changeList('figurative_language');
+          setTimeout(() => {
+            console.log('Starting game after second attempt to change list, current list:', room.listName);
+            socket.emit('start-game', { roomId, spyCount });
+          }, 1000);
+        } else {
+          console.log('Starting game with list:', room.listName);
+          socket.emit('start-game', { roomId, spyCount });
+        }
+      }, 1000); // 延长等待时间到1秒
     } else {
       console.log('Starting game with list:', room.listName);
       socket.emit('start-game', { roomId, spyCount });
