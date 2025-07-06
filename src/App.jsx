@@ -29,6 +29,16 @@ function ThemeToggle() {
   );
 }
 
+function Footer() {
+  return (
+    <footer className="fixed bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none z-50">
+      {isFigLang 
+        ? "By Jerry Jiang | Who Is Spy Online | 2025"
+        : "By 姜姜大当家 | 谁是卧底在线版 | 2025"}
+    </footer>
+  );
+}
+
 export default function App() {
   // 根据域名设置页面标题
   useEffect(() => {
@@ -43,6 +53,7 @@ export default function App() {
         defaultWordList={isFigLang ? 'figurative_language' : 'default'}
       />
       <ThemeToggle />
+      <Footer />
     </ThemeProvider>
   );
 }
