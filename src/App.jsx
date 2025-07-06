@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useEffect } from 'react';
 import { ThemeProvider, useTheme } from 'next-themes';
-// import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'; // No longer needed
+import { FiSun, FiMoon } from 'react-icons/fi'; // Import sun and moon icons
 import Room from './Room';
 import socket, { isFigLang } from './socket';
 import './index.css';
@@ -19,12 +19,12 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="fixed top-4 right-4 p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-sm"
-      aria-label="Toggle theme"
+      className="fixed top-4 right-4 p-2 rounded-full bg-gray-100/30 hover:bg-gray-200/50 transition-colors text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 z-50"
+      aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
     >
       {theme === 'dark' ? 
-        (isFigLang ? 'Switch to Light Mode' : '切换亮色') : 
-        (isFigLang ? 'Switch to Dark Mode' : '切换暗色')}
+        <FiSun className="w-5 h-5" /> : 
+        <FiMoon className="w-5 h-5" />}
     </button>
   );
 }
