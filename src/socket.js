@@ -10,47 +10,60 @@ export const isFigLang = window.location.hostname.includes('figurativelanguage')
 const currentOrigin = window.location.origin;
 console.log('Current origin:', currentOrigin);
 
-// 强制设置 API 基础 URL - 在生产环境中始终使用当前域名，无论环境变量如何设置
-const API_BASE_URL = (window.location.hostname !== 'localhost') 
-  ? currentOrigin  // 使用当前域名
-  : 'http://localhost:3001';
+// 使用 HTML 中预先设置的 API_BASE_URL，如果不存在则使用当前设置逻辑
+const API_BASE_URL = window.API_BASE_URL || 
+  ((window.location.hostname !== 'localhost') 
+    ? currentOrigin  // 使用当前域名
+    : 'http://localhost:3001');
 
-console.log('Current hostname:', window.location.hostname);
-console.log('Environment:', process.env.NODE_ENV);
-console.log('Setting API base URL to:', API_BASE_URL);
+console.log('Socket.js - Current hostname:', window.location.hostname);
+console.log('Socket.js - Environment:', process.env.NODE_ENV);
+console.log('Socket.js - Setting API base URL to:', API_BASE_URL);
 
 // 导出 baseURL 供其他组件使用
 export const baseURL = API_BASE_URL;
 
-// 配置 axios 默认 baseURL
+// 配置 axios 默认 baseURL - 确保使用全局变量
 axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
-// 添加 axios 请求拦截器，用于调试
+// 添加 axios 请求拦截器，用于调试和修复 URL
 axios.interceptors.request.use(request => {
   // 确保 baseURL 正确应用 - 如果是生产环境且请求URL中包含 localhost，则修正
   if (window.location.hostname !== 'localhost' && 
-      (request.url.includes('localhost') || !request.url.startsWith(API_BASE_URL))) {
+      (request.url.includes('localhost') || 
+      (typeof request.url === 'string' && !request.url.startsWith('http') && !request.url.startsWith('/')))) {
     console.warn('检测到可能错误的请求URL:', request.url);
-    if (request.url.startsWith('/')) {
-      // 如果是相对路径，直接使用设置的 baseURL
-      console.log('使用相对路径:', request.url);
-    } else {
-      // 如果是绝对路径且包含 localhost，则将其替换为当前域名
-      console.warn('将localhost替换为当前域名');
-      request.url = request.url.replace(/http:\/\/localhost:3001/g, API_BASE_URL);
+    
+    // 处理不同类型的 URL
+    if (typeof request.url === 'string') {
+      if (request.url.startsWith('http://localhost:3001')) {
+        // 如果是完整的 localhost URL，替换为当前域名
+        console.warn('将 localhost URL 替换为当前域名');
+        request.url = request.url.replace('http://localhost:3001', API_BASE_URL);
+      } else if (!request.url.startsWith('http') && !request.url.startsWith('/')) {
+        // 如果是相对路径但不以斜杠开头，添加斜杠
+        console.log('添加斜杠到相对路径:', request.url);
+        request.url = '/' + request.url;
+      }
     }
   }
   
+  // 记录请求信息
   console.log('Starting Request', {
     url: request.url,
     method: request.method,
     baseURL: request.baseURL,
-    fullURL: request.baseURL + (request.url.startsWith('/') ? request.url : '/' + request.url),
+    fullURL: typeof request.url === 'string' 
+      ? (request.url.startsWith('http') 
+          ? request.url 
+          : (request.baseURL || '') + (request.url.startsWith('/') ? request.url : '/' + request.url))
+      : 'Invalid URL',
     headers: request.headers
   });
+  
   return request;
 });
 

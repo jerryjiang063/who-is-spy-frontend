@@ -2,9 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-   <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>卧底笑传之查出冰 - 谁是卧底在线版</title>
+    <!-- Force correct API URL -->
+    <script>
+      // Store the correct API URL as a global variable before any React code loads
+      window.API_BASE_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001' 
+        : window.location.origin;
+      
+      console.log('HTML Script - Setting API Base URL:', window.API_BASE_URL);
+      
+      // Override fetch to prevent localhost calls in production
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (window.location.hostname !== 'localhost' && url.includes('localhost:3001')) {
+          console.warn('Intercepted localhost fetch call:', url);
+          url = url.replace('http://localhost:3001', window.location.origin);
+          console.log('Redirected to:', url);
+        }
+        return originalFetch.call(this, url, options);
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
