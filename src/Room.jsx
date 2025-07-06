@@ -219,13 +219,24 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
         const response = await axios.get(`${baseURL}/wordlists`);
         console.log('Word lists fetched successfully:', response.data);
         setWordLists(response.data);
+        
+        // 在 figurativelanguage 域名下自动选择 figurative_language 词库
+        if (isFigLang && response.data.includes('figurative_language')) {
+          console.log('Automatically selecting figurative_language list');
+          setSelectedList('figurative_language');
+          // 确保房间存在且已经加入后才更新词库
+          if (room && room.id) {
+            console.log('Room exists, changing list to figurative_language');
+            changeList('figurative_language');
+          }
+        }
       } catch (error) {
         console.error('获取词库列表失败:', error);
       }
     };
     
     fetchWordLists();
-  }, []);
+  }, [isFigLang, room]);
 
   // 根据当前域名过滤词库
   const filteredWordLists = wordLists.filter(list => {
@@ -294,7 +305,19 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       }
       return;
     }
-    socket.emit('start-game',{ roomId, spyCount });
+    
+    // 确保在 figurativelanguage 域名下使用 figurative_language 词库
+    if (isFigLang && room.listName !== 'figurative_language') {
+      console.log('Forcing figurative_language list before starting game');
+      changeList('figurative_language');
+      setTimeout(() => {
+        console.log('Starting game with list:', room.listName);
+        socket.emit('start-game', { roomId, spyCount });
+      }, 500); // 给changeList一点时间生效
+    } else {
+      console.log('Starting game with list:', room.listName);
+      socket.emit('start-game', { roomId, spyCount });
+    }
   };
   
   const toggleVis = () => socket.emit('toggle-visibility',{ roomId,visible:!visible });
