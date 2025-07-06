@@ -7,7 +7,7 @@
   line-height: 1.5;
   font-weight: 700;
   color: #1976d2; /* 深天蓝 */
-  background-color: #B3E5FC; /* 你的天蓝色 */
+  background-color: #F1F4F8; /* 新的背景颜色 */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,7 +21,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #B3E5FC;
+  background: #F1F4F8;
 }
 
 h1, h2, h3, h4, h5, h6 {

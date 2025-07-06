@@ -3,30 +3,34 @@ import { AiOutlinePlus, AiOutlineUser, AiOutlineHome, AiOutlineCheckCircle, AiOu
 import WordListEditor from './WordListEditor';
 import Game from './Game';
 import Vote from './Vote';
+import Punishment from './Punishment';
+import { isFigLang } from './socket';
 import './index.css';
 
-export default function Room({ socket }) {
+export default function Room({ socket, title = '《谁是卧底》在线版', defaultWordList = 'default' }) {
   const [roomId,  setRoomId]   = useState('');
   const [name,    setName]     = useState('');
-  const [room,    setRoom]     = useState({ host:null, listName:'default', players:[] });
+  const [room,    setRoom]     = useState({ host:null, listName: defaultWordList, players:[] });
   const [myWord,  setMyWord]   = useState('');
   const [myRole,  setMyRole]   = useState('');
   const [visible, setVisible]  = useState(false);
   const [phase,   setPhase]    = useState('lobby');
   const [summary, setSummary]  = useState(null);
-  const [wordListName, setWordListName] = useState('default');
+  const [wordListName, setWordListName] = useState(defaultWordList);
   const [showWordListEditor, setShowWordListEditor] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [roomStatus, setRoomStatus] = useState('waiting');
   const [errorMsg, setErrorMsg] = useState('');
   const [waitingForGame, setWaitingForGame] = useState(false);
+  const [inPunishment, setInPunishment] = useState(false);
+  const [spyCount, setSpyCount] = useState(1);
+  const [wordLists, setWordLists] = useState([]);
+  const [selectedList, setSelectedList] = useState('default');
   
   const roomRef = useRef(room);
   useEffect(() => {
     roomRef.current = room;
   }, [room]);
-
-  const spyCount = 1;
 
   useEffect(()=>{
     const onRoomUpdated = data => {
@@ -40,6 +44,13 @@ export default function Room({ socket }) {
           setWaitingForGame(false);
         }
       }
+      
+      if (isFigLang) {
+        const currentPlayer = data.players.find(p => p.id === socket.id);
+        if (currentPlayer) {
+          setInPunishment(currentPlayer.inPunishment);
+        }
+      }
     };
     const onDealWords = ({ word, role }) => {
       setMyWord(word);
@@ -50,12 +61,27 @@ export default function Room({ socket }) {
       setVisible(visible);
     };
     const onVoteTie = () => {
-      alert('本轮平局或弃权多数，重投！');
+      if (isFigLang) {
+        alert('Tie vote or majority abstained. Vote again!');
+      } else {
+        alert('本轮平局或弃权多数，重投！');
+      }
       setPhase('voting');
     };
     const onSpyEliminated = ({ eliminatedId }) => {
-      alert('卧底被票出，平民胜利！');
-      setPhase('finished');
+      if (isFigLang) {
+        alert('The spy has been eliminated! Civilians win!');
+      } else {
+        alert('卧底被票出，平民胜利！');
+      }
+      
+      // 如果当前玩家是卧底且在figurativelanguage域名下，则进入惩罚环节
+      if (isFigLang && myRole === 'spy') {
+        setInPunishment(true);
+        setPhase('punishment');
+      } else {
+        setPhase('finished');
+      }
     };
     const onRoundSummary = ({ summary }) => {
       setSummary(summary);
@@ -65,24 +91,66 @@ export default function Room({ socket }) {
       const currentRoom = roomRef.current;
       const isPlayerAlive = currentRoom.players.find(p => p.id === socket.id)?.alive;
       if (isPlayerAlive) {
-        alert('本轮淘汰的是平民，游戏继续！');
+        if (isFigLang) {
+          alert('A civilian was eliminated. The game continues!');
+        } else {
+          alert('本轮淘汰的是平民，游戏继续！');
+        }
         setPhase('voting');
       }
     };
     const onSpyWin = () => {
-      alert('卧底胜利！');
-      setPhase('finished');
+      if (isFigLang) {
+        alert('The spy wins!');
+      } else {
+        alert('卧底胜利！');
+      }
+      
+      // 如果当前玩家是平民且在figurativelanguage域名下，则进入惩罚环节
+      if (isFigLang && myRole === 'civilian') {
+        setInPunishment(true);
+        setPhase('punishment');
+      } else {
+        setPhase('finished');
+      }
     };
     
     const onRoomExists = () => {
-      setErrorMsg('该房间已存在，请加入或选择其他房间名');
+      if (isFigLang) {
+        setErrorMsg('Room already exists. Please join or choose another room ID.');
+      } else {
+        setErrorMsg('该房间已存在，请加入或选择其他房间名');
+      }
       setTimeout(() => setErrorMsg(''), 3000);
     };
     
     const onKickedFromRoom = () => {
-      alert('你已被房主移出房间');
+      if (isFigLang) {
+        alert('You have been removed from the room by the host.');
+      } else {
+        alert('你已被房主移出房间');
+      }
       setPhase('lobby');
-      setRoom({ host:null, listName:'default', players:[] });
+      setRoom({ host:null, listName: defaultWordList, players:[] });
+    };
+    
+    const onEnterPunishment = () => {
+      if (isFigLang) {
+        setInPunishment(true);
+        setPhase('punishment');
+      }
+    };
+    
+    const onPlayersInPunishment = () => {
+      if (isFigLang) {
+        alert('Some players are still in the punishment phase. Please wait until everyone has completed it before starting a new game.');
+      } else {
+        alert('有玩家正在惩罚环节中，请等待所有玩家完成惩罚环节后再开始游戏');
+      }
+    };
+    
+    const onSpecialWordlistError = ({ message }) => {
+      alert(message);
     };
 
     socket.on('room-updated', onRoomUpdated);
@@ -95,6 +163,12 @@ export default function Room({ socket }) {
     socket.on('spy-win', onSpyWin);
     socket.on('room-exists', onRoomExists);
     socket.on('kicked-from-room', onKickedFromRoom);
+    socket.on('special-wordlist-error', onSpecialWordlistError);
+    
+    if (isFigLang) {
+      socket.on('enter-punishment', onEnterPunishment);
+      socket.on('players-in-punishment', onPlayersInPunishment);
+    }
 
     return () => {
       socket.off('room-updated', onRoomUpdated);
@@ -107,8 +181,14 @@ export default function Room({ socket }) {
       socket.off('spy-win', onSpyWin);
       socket.off('room-exists', onRoomExists);
       socket.off('kicked-from-room', onKickedFromRoom);
+      socket.off('special-wordlist-error', onSpecialWordlistError);
+      
+      if (isFigLang) {
+        socket.off('enter-punishment', onEnterPunishment);
+        socket.off('players-in-punishment', onPlayersInPunishment);
+      }
     };
-  },[socket]);
+  },[socket, defaultWordList, waitingForGame, myRole]);
 
   useEffect(() => {
     function updateIsHost() {
@@ -127,9 +207,41 @@ export default function Room({ socket }) {
     }
   }, [room, roomId]);
 
+  // 获取所有可用词库
+  useEffect(() => {
+    const fetchWordLists = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/wordlists');
+        const data = await response.json();
+        setWordLists(data);
+      } catch (error) {
+        console.error('获取词库列表失败:', error);
+      }
+    };
+    
+    fetchWordLists();
+  }, []);
+
+  // 根据当前域名过滤词库
+  const filteredWordLists = wordLists.filter(list => {
+    if (isFigLang) {
+      // 在 figurativelanguage 域名下只显示 figurative_language 词库
+      return list === 'figurative_language';
+    } else {
+      // 在普通域名下不显示 figurative_language 词库
+      return list !== 'figurative_language';
+    }
+  });
+
   const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
   const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
-  const changeList    = ln=>socket.emit('change-list',{ roomId,listName:ln });
+  const changeList    = ln=>{
+    if (ln === 'figurative_language' && !isFigLang) {
+      alert('该词库为特殊词库，请在figurativelanguage.spyccb.top中使用。');
+      return;
+    }
+    socket.emit('change-list',{ roomId,listName:ln });
+  };
   
   const resetGame = () => {
     setPhase('lobby');
@@ -145,11 +257,11 @@ export default function Room({ socket }) {
         } else {
           socket.emit('leave-room', { roomId });
           setPhase('lobby');
-          setRoom({ host:null, listName:'default', players:[] });
+          setRoom({ host:null, listName: defaultWordList, players:[] });
         }
       } else {
         setPhase('lobby');
-        setRoom({ host:null, listName:'default', players:[] });
+        setRoom({ host:null, listName: defaultWordList, players:[] });
       }
     });
   };
@@ -159,221 +271,282 @@ export default function Room({ socket }) {
       socket.emit('kick-player', { roomId, playerId });
     }
   };
-  
-  const startGame     = ()=>{
-    console.log('startGame called', { roomId, isHost, players: room.players });
-    if (!roomId) {
-      alert('房间号不能为空！');
+
+  const startGame = () => {
+    if (room.players.length < 3) {
+      if (isFigLang) {
+        alert('At least 3 players are needed to start the game.');
+      } else {
+        alert('至少需要3名玩家才能开始游戏');
+      }
       return;
     }
-    if (!isHost) {
-      alert('只有房主可以开始游戏！');
+    if (spyCount >= room.players.length) {
+      if (isFigLang) {
+        alert('The number of spies cannot be greater than or equal to the total number of players.');
+      } else {
+        alert('卧底数量不能大于或等于玩家总数');
+      }
       return;
     }
-    if (!room.players || room.players.length < 2) {
-      alert('至少需要2名玩家才能开始游戏！');
-      return;
-    }
-    setSummary(null);
-    console.log('emit start-game', { roomId, spyCount });
-    socket.emit('start-game',{ roomId,spyCount });
+    socket.emit('start-game',{ roomId, spyCount });
   };
-  const toggleVis     = ()=>socket.emit('toggle-visibility',{ roomId,visible:!visible });
+  
+  const toggleVis = () => socket.emit('toggle-visibility',{ roomId,visible:!visible });
 
-  useEffect(() => {
-    document.body.style.background = '#EBEFF5';
-    return () => { document.body.style.background = '#B3E5FC'; };
-  }, []);
+  // 当惩罚环节完成时
+  const onPunishmentCompleted = () => {
+    socket.emit('punishment-completed', { roomId });
+    setInPunishment(false);
+    setPhase('lobby');
+  };
 
-  const isReturnButtonDisabled = phase === 'eliminated' && roomStatus === 'playing';
+  // 根据当前阶段渲染不同的内容
+  if (phase === 'waiting') {
+    return (
+      <div className="card-center">
+        <h2>{isFigLang ? 'Waiting for Game to End' : '等待游戏结束'}</h2>
+        <p className="text-lg text-center mb-4">
+          {isFigLang 
+            ? 'You have left the room, but the game is still in progress. You will automatically return to the lobby when the game ends.' 
+            : '你已离开房间，但游戏仍在进行中。游戏结束后将自动返回大厅。'}
+        </p>
+      </div>
+    );
+  }
+  
+  if (phase === 'punishment' && isFigLang) {
+    return (
+      <Punishment 
+        socket={socket}
+        roomId={roomId}
+        onCompleted={onPunishmentCompleted}
+      />
+    );
+  }
 
-  return (
-    <div className="card-center min-h-screen w-full flex flex-col items-center justify-center relative">
-      <h1 className="text-5xl mb-10">《谁是卧底》在线版</h1>
-      
-      {errorMsg && (
-        <div className="w-full bg-red-100 text-red-800 p-2 rounded mb-4 text-center">
-          {errorMsg}
-        </div>
-      )}
-      
-      {phase === 'waiting' && (
-        <div className="w-full text-center">
-          <h2 className="text-2xl mb-6">当前房间正在游戏中，请稍后</h2>
-          <button className="w-full text-base py-2" onClick={() => {
-            setWaitingForGame(false);
-            setPhase('lobby');
-            setRoom({ host:null, listName:'default', players:[] });
-          }}>
-            返回主页
-          </button>
-        </div>
-      )}
-      
-      {phase === 'lobby' && !showWordListEditor && (
-        <div className="flex flex-col gap-4 w-full max-w-xl items-center">
-            <input
-            className="w-full text-base py-2 px-4"
-            placeholder="房间号"
-            value={roomId}
-            onChange={e => setRoomId(e.target.value)}
-            />
-            <input
-            className="w-full text-base py-2 px-4"
-            placeholder="昵称"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            />
-          <button className="w-full text-base py-2" onClick={createRoom}>创建房间</button>
-          <button className="w-full text-base py-2" onClick={joinRoom}>加入房间</button>
-          <button className="w-full text-base py-2" onClick={()=>setShowWordListEditor(true)}>词库编辑</button>
-          <div className="mb-8 w-full">
-            <div className="text-2xl font-bold mb-2">玩家列表：</div>
-            <ul className="text-xl font-bold text-sky-600">
-              {room.players.map((p) => (
-                <li key={p.id} className="flex justify-between items-center">
-                  <span>{p.name}</span>
-                  {isHost && p.id !== socket.id && (
-                    <button 
-                      className="text-red-500 hover:text-red-700 text-sm"
-                      onClick={() => kickPlayer(p.id)}
+  if (phase === 'lobby') {
+    return (
+      <div className="card-center">
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
+        
+        {!room.host ? (
+          // 未加入房间
+          <>
+            <div className="w-full max-w-md">
+              <input
+                type="text"
+                placeholder={isFigLang ? "Enter Room ID" : "输入房间ID"}
+                value={roomId}
+                onChange={e => setRoomId(e.target.value)}
+                className="w-full mb-2"
+              />
+              <input
+                type="text"
+                placeholder={isFigLang ? "Enter Your Name" : "输入你的名字"}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full mb-2"
+              />
+              {errorMsg && <div className="text-red-500 mb-2">{errorMsg}</div>}
+              <div className="flex gap-2">
+                <button onClick={createRoom} className="w-1/2 flex items-center justify-center">
+                  <AiOutlinePlus className="mr-2" /> {isFigLang ? "Create Room" : "创建房间"}
+                </button>
+                <button onClick={joinRoom} className="w-1/2 flex items-center justify-center">
+                  <AiOutlineHome className="mr-2" /> {isFigLang ? "Join Room" : "加入房间"}
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          // 已加入房间
+          <>
+            <div className="w-full max-w-md">
+              <h2 className="text-2xl mb-4">{isFigLang ? `Room: ${roomId}` : `房间: ${roomId}`}</h2>
+              
+              {/* 玩家列表 */}
+              <div className="bg-white/50 rounded-xl p-4 mb-4">
+                <h3 className="text-xl mb-2">{isFigLang ? "Player List" : "玩家列表"}</h3>
+                <ul className="space-y-2">
+                  {room.players.map(p => (
+                    <li key={p.id} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <AiOutlineUser className="mr-2" />
+                        <span>{p.name}</span>
+                        {p.id === room.host && <span className="ml-2 text-yellow-600">
+                          {isFigLang ? "(Host)" : "(房主)"}
+                        </span>}
+                        {isFigLang && p.inPunishment && <span className="ml-2 text-red-500">
+                          {isFigLang ? "(In Punishment)" : "(惩罚中)"}
+                        </span>}
+                      </div>
+                      {isHost && p.id !== socket.id && (
+                        <button 
+                          onClick={() => kickPlayer(p.id)}
+                          className="text-red-500 hover:text-red-700 text-sm p-1"
+                        >
+                          <AiOutlineClose />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              {/* 房主控制面板 */}
+              {isHost && (
+                <div className="bg-white/50 rounded-xl p-4 mb-4">
+                  <h3 className="text-xl mb-2">{isFigLang ? "Game Settings" : "游戏设置"}</h3>
+                  
+                  <div className="flex items-center mb-4">
+                    <label className="mr-2">{isFigLang ? "Word List:" : "词库:"}</label>
+                    <select 
+                      value={room.listName} 
+                      onChange={e => changeList(e.target.value)}
+                      className="flex-grow text-base p-2"
                     >
-                      <AiOutlineClose /> 移出
+                      {filteredWordLists.map(list => (
+                        <option key={list} value={list}>{list}</option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={() => setShowWordListEditor(true)}
+                      className="ml-2 text-sm p-2 bg-blue-100 hover:bg-blue-200 rounded"
+                    >
+                      {isFigLang ? "Edit" : "编辑"}
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center mb-4">
+                    <label className="mr-2">{isFigLang ? "Number of Spies:" : "卧底数:"}</label>
+                    <select 
+                      value={spyCount} 
+                      onChange={e => setSpyCount(Number(e.target.value))}
+                      className="flex-grow text-base p-2"
+                    >
+                      {[1, 2, 3, 4].map(n => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {roomStatus === 'playing' && (
+                    <button 
+                      onClick={toggleVis}
+                      className="w-full flex items-center justify-center mb-4"
+                    >
+                      {visible ? (
+                        <>
+                          <AiOutlineEyeInvisible className="mr-2" /> {isFigLang ? "Hide All Identities" : "隐藏所有人身份"}
+                        </>
+                      ) : (
+                        <>
+                          <AiOutlineEye className="mr-2" /> {isFigLang ? "Show All Identities" : "显示所有人身份"}
+                        </>
+                      )}
                     </button>
                   )}
-                </li>
-              ))}
-            </ul>
-            <div className="text-xs text-sky-400 mt-2">
-              {room.host ? `房主：${room.players.find(p=>p.id===room.host)?.name || room.host}` : '请先创建或加入房间'}
-          </div>
-          </div>
-          {isHost && (
-            <div className="space-y-3 w-full">
-              <button 
-                className="w-full text-base py-2"
-                onClick={startGame}
-                disabled={!isHost}
-              >
-                开始游戏
-              </button>
-              <button 
-                className="w-full text-base py-2"
-                onClick={toggleVis}
-              >
-                {visible ? '隐藏身份' : '显示身份'}
-              </button>
-            </div>
-          )}
-          {!isHost && room.host && (
-            <div className="w-full text-xs text-red-400 text-center mt-2">只有房主可以开始游戏</div>
-          )}
-        </div>
-      )}
-      {showWordListEditor && (
-        <WordListEditor
-          current={wordListName}
-          onSelectList={name => {
-            setWordListName(name);
-            changeList(name);
-          }}
-          onBack={() => setShowWordListEditor(false)}
-        />
-      )}
-      {phase === 'playing' && (
-        <div className="w-full">
-          <Game word={myWord} role={myRole} visible={visible}/>
-          <div className="mt-6 text-center w-full">
-            <button
-              className="w-full text-base py-2"
-              onClick={()=>setPhase('voting')}
-            >
-              开始投票
-            </button>
-            <button
-              className="w-full text-base py-2 mt-2"
-              onClick={leaveRoom}
-            >
-              返回大厅
-            </button>
-          </div>
-        </div>
-      )}
-      {phase === 'voting' && (
-        <div className="w-full">
-          <Vote roomId={roomId} players={room.players}/>
-          <div className="mt-4 text-center w-full">
-            <button
-              className="w-full text-base py-2"
-              onClick={leaveRoom}
-            >
-              返回大厅
-            </button>
-          </div>
-        </div>
-      )}
-      {phase === 'eliminated' && (
-        <div className="w-full">
-          <h2 className="title text-destructive text-center">你已被淘汰</h2>
-          <div className="w-full text-center">
-            <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
-            <div className="space-y-2 mb-6">
-            {summary && Object.entries(summary).map(([pid,{word,role}])=>(
-                <div 
-                  key={pid}
-                  className={`p-3 rounded-md text-center ${
-                    role === 'spy' ? 'bg-sky-100' : 'bg-white/40'
-                  }`}
-                >
-                  <span className={`text-center font-bold ${role === 'spy' ? 'text-red-400' : 'text-sky-500'}`}>
-                    {role === 'spy' ? '【卧底】' : '【平民】'}
-                  </span>
-                  <span className="text-center">{' '}{word} — {room.players.find(p=>p.id===pid)?.name}</span>
+                  
+                  <button 
+                    onClick={startGame}
+                    className="w-full flex items-center justify-center"
+                    disabled={isFigLang && room.players.some(p => p.inPunishment)}
+                  >
+                    <AiOutlinePlayCircle className="mr-2" /> 
+                    {isFigLang ? "Start Game" : "开始游戏"}
+                    {isFigLang && room.players.some(p => p.inPunishment) && 
+                      (isFigLang ? " (Players in punishment)" : " (有玩家在惩罚环节)")}
+                  </button>
                 </div>
-            ))}
+              )}
+              
+              <button onClick={leaveRoom} className="w-full">{isFigLang ? "Leave Room" : "离开房间"}</button>
             </div>
-          <button
-              className={`w-full text-base py-2 ${isReturnButtonDisabled ? 'bg-gray-300 cursor-not-allowed opacity-50' : ''}`}
-              onClick={leaveRoom}
-              disabled={isReturnButtonDisabled}
-          >
-            {isReturnButtonDisabled ? '请等待游戏结束' : '返回大厅'}
-          </button>
-          </div>
-        </div>
-      )}
-      {phase === 'finished' && (
-        <div className="w-full">
-          <h1 className="title text-center">游戏结束 🎉</h1>
-          {summary && (
-            <div className="space-y-2 mb-6">
-              <h3 className="text-xl font-bold mb-4 text-center">本轮角色 & 词语</h3>
-              {Object.entries(summary).map(([pid, { word, role }]) => (
-                <div
-                  key={pid}
-                  className={`p-3 rounded-md text-center ${role === 'spy' ? 'bg-sky-100' : 'bg-white/40'}`}
-                >
-                  <span className={`text-center font-bold ${role === 'spy' ? 'text-red-400' : 'text-sky-500'}`}>
-                    {role === 'spy' ? '【卧底】' : '【平民】'}
-                  </span>
-                  <span className="text-center">{' '}{word} — {room.players.find(p => p.id === pid)?.name}</span>
+            
+            {/* 词库编辑器 */}
+            {showWordListEditor && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-auto">
+                  <WordListEditor 
+                    current={room.listName}
+                    onSelectList={changeList}
+                    onBack={() => setShowWordListEditor(false)}
+                    filteredWordLists={filteredWordLists}
+                  />
                 </div>
-              ))}
-            </div>
-          )}
-          <div className="w-full text-center">
-          <button
-              className="w-full text-base py-2"
-            onClick={resetGame}
-          >
-            返回大厅
-          </button>
-          </div>
-        </div>
-      )}
-      <div className="fixed bottom-2 left-0 w-full text-center text-xs text-sky-400 font-bold opacity-80 select-none z-50">
-        By 姜姜大当家 | 谁是卧底在线版 | 2025
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (phase === 'playing') {
+    return (
+      <Game
+        word={myWord}
+        role={myRole}
+        visible={visible}
+        onToggleVisible={toggleVis}
+        onNext={() => setPhase('voting')}
+      />
+    );
+  }
+
+  if (phase === 'voting') {
+    return (
+      <Vote
+        socket={socket}
+        roomId={roomId}
+        players={room.players.filter(p => p.alive)}
+        myId={socket.id}
+      />
+    );
+  }
+
+  if (phase === 'eliminated' || phase === 'finished') {
+    return (
+      <div className="card-center">
+        <h2 className="text-3xl mb-6">{isFigLang ? "Game Over" : "游戏结束"}</h2>
+        
+        {summary && (
+          <div className="bg-white/50 rounded-xl p-4 mb-6 w-full max-w-md">
+            <h3 className="text-xl mb-2">{isFigLang ? "Words This Round" : "本局词语"}</h3>
+            <ul className="space-y-2">
+              {Object.entries(summary).map(([pid, info]) => {
+                const player = room.players.find(p => p.id === pid);
+                return (
+                  <li key={pid} className="flex items-center justify-between">
+                    <span>{player?.name || (isFigLang ? 'Unknown Player' : '未知玩家')}</span>
+                    <div>
+                      <span className={info.role === 'spy' ? 'text-red-500' : 'text-green-500'}>
+                        {info.role === 'spy' 
+                          ? (isFigLang ? 'Spy' : '卧底') 
+                          : (isFigLang ? 'Civilian' : '平民')}
+                      </span>
+                      <span className="ml-2">{isFigLang ? `Word: ${info.word}` : `词语: ${info.word}`}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        
+        {isHost ? (
+          <button onClick={resetGame} className="w-full max-w-md flex items-center justify-center">
+            <AiOutlineHome className="mr-2" /> {isFigLang ? "Return to Lobby" : "返回大厅"}
+          </button>
+        ) : (
+          <div className="text-center text-lg">
+            {isFigLang ? "Waiting for host to start a new game..." : "等待房主开始新游戏..."}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return <div>{isFigLang ? "Unknown game phase" : "未知游戏阶段"}</div>;
 }
