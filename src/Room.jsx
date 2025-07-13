@@ -111,6 +111,9 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
           alert('本轮淘汰的是平民，游戏继续！');
         }
         setPhase('voting');
+      } else {
+        // 即使玩家已被淘汰，也更新UI状态以显示投票进行中
+        setPhase('eliminated');
       }
     };
     const onSpyWin = () => {
@@ -175,7 +178,21 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       
       // 如果游戏已经开始，但我们没有词语，需要等待服务器重新发送
       if (room.gameStarted) {
-        setWaitingForGame(true);
+        if (room.votingStarted) {
+          // 如果已经进入投票阶段
+          const isPlayerAlive = room.players.find(p => p.id === socket.id)?.alive;
+          if (isPlayerAlive) {
+            console.log('Game is in voting phase and player is alive, setting phase to voting');
+            setPhase('voting');
+          } else {
+            console.log('Game is in voting phase but player is eliminated, setting phase to eliminated');
+            setPhase('eliminated');
+          }
+        } else {
+          // 游戏已开始但还未进入投票阶段
+          console.log('Game started but not in voting phase, waiting for word info');
+          setWaitingForGame(true);
+        }
       } else {
         setPhase('lobby');
       }
@@ -330,8 +347,8 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   };
   
   const leaveRoom = () => {
-    socket.emit('leave-room', { roomId });
-    setPhase('lobby');
+          socket.emit('leave-room', { roomId });
+          setPhase('lobby');
     setRoom({ host: null, listName: defaultWordList, players: [] });
     setMyWord('');
     setMyRole('');
@@ -443,6 +460,75 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     );
   }
 
+  if (phase === 'playing') {
+    return (
+      <Game 
+        word={myWord} 
+        role={myRole} 
+        visible={visible}
+        onNext={() => {
+          console.log('Starting voting phase');
+          setPhase('voting');
+          // 通知服务器该玩家已准备好投票
+          socket.emit('ready-to-vote', { roomId });
+        }}
+      />
+    );
+  }
+
+  if (phase === 'voting') {
+    return (
+      <Vote 
+        socket={socket}
+        roomId={roomId}
+        players={room.players.filter(p => p.alive && p.id !== socket.id)}
+        myId={socket.id}
+      />
+    );
+  }
+
+  if (phase === 'eliminated' || phase === 'finished') {
+    return (
+      <div className="card-center">
+        <h2 className="text-3xl mb-6">{isFigLang ? "Game Over" : "游戏结束"}</h2>
+        
+        {summary && (
+          <div className="bg-white/50 rounded-xl p-4 mb-6 w-full max-w-md">
+            <h3 className="text-xl mb-2">{isFigLang ? "Words This Round" : "本局词语"}</h3>
+            <ul className="space-y-2">
+              {Object.entries(summary).map(([pid, info]) => {
+                const player = room.players.find(p => p.id === pid);
+                return (
+                  <li key={pid} className="flex items-center justify-between">
+                    <span>{player?.name || (isFigLang ? 'Unknown Player' : '未知玩家')}</span>
+                    <div>
+                      <span className={info.role === 'spy' ? 'text-red-500' : 'text-green-500'}>
+                        {info.role === 'spy' 
+                          ? (isFigLang ? 'Spy' : '卧底') 
+                          : (isFigLang ? 'Civilian' : '平民')}
+                      </span>
+                      <span className="ml-2">{isFigLang ? `Word: ${info.word}` : `词语: ${info.word}`}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        
+        {isHost ? (
+          <button onClick={resetGame} className="w-full max-w-md flex items-center justify-center">
+            <AiOutlineHome className="mr-2" /> {isFigLang ? "Return to Lobby" : "返回大厅"}
+          </button>
+        ) : (
+          <div className="text-center text-lg">
+            {isFigLang ? "Waiting for host to start a new game..." : "等待房主开始新游戏..."}
+          </div>
+        )}
+      </div>
+    );
+  }
+  
   if (phase === 'lobby') {
     return (
       <div className="card-center">
@@ -559,26 +645,9 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
                     </select>
                   </div>
                   
-                  {roomStatus === 'playing' && (
-                    <button 
-                      onClick={toggleVis}
-                      className="w-full flex items-center justify-center mb-4"
-                    >
-                      {visible ? (
-                        <>
-                          <AiOutlineEyeInvisible className="mr-2" /> {isFigLang ? "Hide All Identities" : "隐藏所有人身份"}
-                        </>
-                      ) : (
-                        <>
-                          <AiOutlineEye className="mr-2" /> {isFigLang ? "Show All Identities" : "显示所有人身份"}
-                        </>
-                      )}
-                    </button>
-                  )}
-                  
                   <button 
                     onClick={startGame}
-                    className="w-full flex items-center justify-center"
+                    className="w-full flex items-center justify-center p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                     disabled={isFigLang && room.players.some(p => p.inPunishment)}
                   >
                     <AiOutlinePlayCircle className="mr-2" /> 
@@ -618,71 +687,6 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
               </div>
             )}
           </>
-        )}
-      </div>
-    );
-  }
-
-  if (phase === 'playing') {
-    return (
-      <Game
-        word={myWord}
-        role={myRole}
-        visible={visible}
-        onToggleVisible={toggleVis}
-        onNext={() => setPhase('voting')}
-      />
-    );
-  }
-
-  if (phase === 'voting') {
-    return (
-      <Vote
-        socket={socket}
-        roomId={roomId}
-        players={room.players.filter(p => p.alive)}
-        myId={socket.id}
-      />
-    );
-  }
-
-  if (phase === 'eliminated' || phase === 'finished') {
-    return (
-      <div className="card-center">
-        <h2 className="text-3xl mb-6">{isFigLang ? "Game Over" : "游戏结束"}</h2>
-        
-        {summary && (
-          <div className="bg-white/50 rounded-xl p-4 mb-6 w-full max-w-md">
-            <h3 className="text-xl mb-2">{isFigLang ? "Words This Round" : "本局词语"}</h3>
-            <ul className="space-y-2">
-              {Object.entries(summary).map(([pid, info]) => {
-                const player = room.players.find(p => p.id === pid);
-                return (
-                  <li key={pid} className="flex items-center justify-between">
-                    <span>{player?.name || (isFigLang ? 'Unknown Player' : '未知玩家')}</span>
-                    <div>
-                      <span className={info.role === 'spy' ? 'text-red-500' : 'text-green-500'}>
-                        {info.role === 'spy' 
-                          ? (isFigLang ? 'Spy' : '卧底') 
-                          : (isFigLang ? 'Civilian' : '平民')}
-                      </span>
-                      <span className="ml-2">{isFigLang ? `Word: ${info.word}` : `词语: ${info.word}`}</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-        
-        {isHost ? (
-          <button onClick={resetGame} className="w-full max-w-md flex items-center justify-center">
-            <AiOutlineHome className="mr-2" /> {isFigLang ? "Return to Lobby" : "返回大厅"}
-          </button>
-        ) : (
-          <div className="text-center text-lg">
-            {isFigLang ? "Waiting for host to start a new game..." : "等待房主开始新游戏..."}
-          </div>
         )}
       </div>
     );

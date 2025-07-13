@@ -23,9 +23,16 @@ export default function Game({ word, role, visible, onNext }) {
           {isFigLang ? `Your identity: ${displayRole}` : `你的身份：${displayRole}`}
         </div>
         
+        <div className="text-center mb-4 text-gray-700">
+          {isFigLang 
+            ? "After everyone has described their word, click the button below to start voting."
+            : "在所有人都描述完自己的词语后，点击下方按钮开始投票。"
+          }
+        </div>
+        
         <button 
           onClick={onNext}
-          className="w-full flex items-center justify-center"
+          className="w-full flex items-center justify-center p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           <AiOutlinePlayCircle className="mr-2" /> {isFigLang ? "Start Voting" : "开始投票"}
         </button>
