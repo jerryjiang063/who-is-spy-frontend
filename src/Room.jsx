@@ -148,6 +148,17 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       }
     };
     
+    // 游戏重置事件处理
+    const onGameReset = () => {
+      console.log('Game reset received');
+      setPhase('lobby');
+      setMyWord('');
+      setMyRole('');
+      setVisible(false);
+      setSummary(null);
+      setInPunishment(false);
+    };
+    
     const onRoomExists = () => {
       if (isFigLang) {
         setErrorMsg('Room already exists. Please join or choose another room ID.');
@@ -235,6 +246,7 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     socket.on('special-wordlist-error', onSpecialWordlistError);
     socket.on('rejoin-success', onRejoinSuccess);
     socket.on('rejoin-failed', onRejoinFailed);
+    socket.on('game-reset', onGameReset);
     
     if (isFigLang) {
       socket.on('enter-punishment', onEnterPunishment);
@@ -255,6 +267,7 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       socket.off('special-wordlist-error', onSpecialWordlistError);
       socket.off('rejoin-success', onRejoinSuccess);
       socket.off('rejoin-failed', onRejoinFailed);
+      socket.off('game-reset', onGameReset);
       
       if (isFigLang) {
         socket.off('enter-punishment', onEnterPunishment);
@@ -358,13 +371,19 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   };
   
   const resetGame = () => {
+    console.log('Resetting game...');
     setPhase('lobby');
+    setMyWord('');
+    setMyRole('');
+    setVisible(false);
+    setSummary(null);
+    setInPunishment(false);
     socket.emit('reset-game', { roomId });
   };
-  
+
   const leaveRoom = () => {
-          socket.emit('leave-room', { roomId });
-          setPhase('lobby');
+    socket.emit('leave-room', { roomId });
+    setPhase('lobby');
     setRoom({ host: null, listName: defaultWordList, players: [] });
     setMyWord('');
     setMyRole('');
@@ -532,15 +551,28 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
           </div>
         )}
         
-        {isHost ? (
-          <button onClick={resetGame} className="w-full max-w-md flex items-center justify-center">
-            <AiOutlineHome className="mr-2" /> {isFigLang ? "Return to Lobby" : "返回大厅"}
+        <div className="flex flex-col gap-2 w-full max-w-md">
+          {isHost ? (
+            <button 
+              onClick={resetGame} 
+              className="w-full flex items-center justify-center p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              <AiOutlineHome className="mr-2" /> {isFigLang ? "Return to Lobby" : "返回大厅"}
+            </button>
+          ) : (
+            <div className="text-center text-lg mb-4">
+              {isFigLang ? "Waiting for host to start a new game..." : "等待房主开始新游戏..."}
+            </div>
+          )}
+          
+          {/* 所有玩家都可以离开房间 */}
+          <button 
+            onClick={leaveRoom} 
+            className="w-full flex items-center justify-center p-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+          >
+            {isFigLang ? "Leave Room" : "离开房间"}
           </button>
-        ) : (
-          <div className="text-center text-lg">
-            {isFigLang ? "Waiting for host to start a new game..." : "等待房主开始新游戏..."}
-          </div>
-        )}
+        </div>
       </div>
     );
   }
