@@ -17,11 +17,9 @@ export default function Vote({ socket, roomId, players, myId }) {
       return;
     }
     
-    // 过滤出存活的玩家
-    const alive = players.filter(p => p.alive);
-    console.log("Vote component - Alive players:", alive);
-    
-    setAlivePlayers(alive);
+    // 设置存活的玩家
+    setAlivePlayers(players);
+    console.log("Vote component - Alive players set:", players);
   }, [players]);
   
   const submit = () => {
@@ -48,8 +46,8 @@ export default function Vote({ socket, roomId, players, myId }) {
                 key={p.id} 
                 className={`w-full flex items-center justify-between p-3 rounded-lg ${
                   target === p.id ? 'bg-blue-100 ring-2 ring-blue-300' : 'bg-white/80 hover:bg-blue-50'
-                }`}
-                onClick={() => setTarget(p.id)}
+                } ${p.id === myId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => p.id !== myId && setTarget(p.id)}
                 disabled={p.id === myId}
               >
                 <div className="flex items-center">

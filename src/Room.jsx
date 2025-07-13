@@ -50,6 +50,19 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
         }
       }
       
+      // 如果房间处于投票阶段，确保玩家看到正确的界面
+      if (data.votingStarted) {
+        console.log('Room is in voting phase, current phase:', phase);
+        const isPlayerAlive = data.players.find(p => p.id === socket.id)?.alive;
+        if (isPlayerAlive && phase !== 'voting') {
+          console.log('Player is alive, setting phase to voting');
+          setPhase('voting');
+        } else if (!isPlayerAlive && phase !== 'eliminated') {
+          console.log('Player is eliminated, setting phase to eliminated');
+          setPhase('eliminated');
+        }
+      }
+      
       // 确保在 figurativelanguage 域名下使用 figurative_language 词库
       if (isFigLang && data.listName !== 'figurative_language' && data.status === 'waiting') {
         console.log('Room updated with incorrect list name, changing to figurative_language');
@@ -104,6 +117,9 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     const onStartNextVote = () => {
       const currentRoom = roomRef.current;
       const isPlayerAlive = currentRoom.players.find(p => p.id === socket.id)?.alive;
+      
+      console.log(`Start next vote received, player alive: ${isPlayerAlive}`);
+      
       if (isPlayerAlive) {
         if (isFigLang) {
           alert('A civilian was eliminated. The game continues!');
@@ -481,7 +497,7 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       <Vote 
         socket={socket}
         roomId={roomId}
-        players={room.players.filter(p => p.alive && p.id !== socket.id)}
+        players={room.players.filter(p => p.alive)}
         myId={socket.id}
       />
     );

@@ -12,6 +12,11 @@ export default function Game({ word, role, visible, onNext }) {
     ? (role === 'spy' ? (isFigLang ? 'Spy' : '卧底') : (isFigLang ? 'Civilian' : '平民'))
     : (isFigLang ? 'Hidden' : '保密');
 
+  const handleStartVoting = () => {
+    console.log('Start voting button clicked');
+    onNext();
+  };
+
   return (
     <div className="card-center">
       <h2 className="text-3xl mb-6">{isFigLang ? "Game in Progress" : "游戏进行中"}</h2>
@@ -31,7 +36,7 @@ export default function Game({ word, role, visible, onNext }) {
         </div>
         
         <button 
-          onClick={onNext}
+          onClick={handleStartVoting}
           className="w-full flex items-center justify-center p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           <AiOutlinePlayCircle className="mr-2" /> {isFigLang ? "Start Voting" : "开始投票"}
