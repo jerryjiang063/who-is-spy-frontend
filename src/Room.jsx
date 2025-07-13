@@ -349,15 +349,25 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
 
   const createRoom = () => {
     socket.emit('create-room', { roomId, name, listName: wordListName });
-    // 保存玩家信息用于断线重连
-    setPlayerInfo(name, roomId);
+    // 保存玩家信息用于断线重连，创建房间的玩家是房主
+    setPlayerInfo(name, roomId, true);
   };
 
   const joinRoom = () => {
     socket.emit('join-room', { roomId, name });
-    // 保存玩家信息用于断线重连
-    setPlayerInfo(name, roomId);
+    // 保存玩家信息用于断线重连，加入房间的玩家不是房主
+    setPlayerInfo(name, roomId, false);
   };
+
+  // 添加一个useEffect来监听房主状态变化
+  useEffect(() => {
+    if (socket.id && room.host && socket.id === room.host) {
+      // 如果当前玩家是房主，更新存储的信息
+      if (name && roomId) {
+        setPlayerInfo(name, roomId, true);
+      }
+    }
+  }, [socket.id, room.host, name, roomId]);
   const changeList    = ln=>{
     console.log(`Changing word list to: ${ln}`);
     

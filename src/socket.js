@@ -155,37 +155,43 @@ const socket = io(socketURL, {
 let currentPlayerInfo = {
   name: '',
   roomId: '',
-  isConnected: false
+  isConnected: false,
+  isHost: false
 };
 
 // 设置当前玩家信息
-export const setPlayerInfo = (name, roomId) => {
-  console.log(`Setting player info: name=${name}, roomId=${roomId}`);
+export const setPlayerInfo = (name, roomId, isHost = false) => {
+  console.log(`Setting player info: name=${name}, roomId=${roomId}, isHost=${isHost}`);
   currentPlayerInfo.name = name;
   currentPlayerInfo.roomId = roomId;
+  currentPlayerInfo.isHost = isHost;
   
   // 将信息存储在localStorage中，以便页面刷新后恢复
   localStorage.setItem('whoisspy_player_name', name);
   localStorage.setItem('whoisspy_room_id', roomId);
+  localStorage.setItem('whoisspy_is_host', isHost ? 'true' : 'false');
 };
 
 // 清除玩家信息
 export const clearPlayerInfo = () => {
   console.log('Clearing player info');
-  currentPlayerInfo = { name: '', roomId: '', isConnected: false };
+  currentPlayerInfo = { name: '', roomId: '', isConnected: false, isHost: false };
   localStorage.removeItem('whoisspy_player_name');
   localStorage.removeItem('whoisspy_room_id');
+  localStorage.removeItem('whoisspy_is_host');
 };
 
 // 尝试从localStorage恢复玩家信息
 const restorePlayerInfo = () => {
   const name = localStorage.getItem('whoisspy_player_name');
   const roomId = localStorage.getItem('whoisspy_room_id');
+  const isHost = localStorage.getItem('whoisspy_is_host') === 'true';
   
   if (name && roomId) {
-    console.log(`Restored player info from localStorage: name=${name}, roomId=${roomId}`);
+    console.log(`Restored player info from localStorage: name=${name}, roomId=${roomId}, isHost=${isHost}`);
     currentPlayerInfo.name = name;
     currentPlayerInfo.roomId = roomId;
+    currentPlayerInfo.isHost = isHost;
     return true;
   }
   return false;
@@ -226,7 +232,8 @@ socket.on('connect', () => {
     // 发送重连请求
     socket.emit('rejoin-room', {
       playerName: currentPlayerInfo.name,
-      roomId: currentPlayerInfo.roomId
+      roomId: currentPlayerInfo.roomId,
+      wasHost: currentPlayerInfo.isHost // 添加房主状态信息
     });
     
     // 5秒后自动移除通知
@@ -259,7 +266,8 @@ socket.on('connect', () => {
       
       socket.emit('rejoin-room', {
         playerName: currentPlayerInfo.name,
-        roomId: currentPlayerInfo.roomId
+        roomId: currentPlayerInfo.roomId,
+        wasHost: currentPlayerInfo.isHost // 添加房主状态信息
       });
       
       // 5秒后自动移除通知
