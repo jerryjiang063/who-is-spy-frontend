@@ -120,11 +120,17 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       
       console.log(`Start next vote received, player alive: ${isPlayerAlive}`);
       
+      // 检查是否是第一轮投票（游戏刚开始）还是后续轮次（有玩家被淘汰）
+      const isFirstVotingRound = !summary; // 如果没有summary，说明是第一轮投票
+      
       if (isPlayerAlive) {
-        if (isFigLang) {
-          alert('A civilian was eliminated. The game continues!');
-        } else {
-          alert('本轮淘汰的是平民，游戏继续！');
+        // 只有在非第一轮投票时才显示淘汰信息
+        if (!isFirstVotingRound) {
+          if (isFigLang) {
+            alert('A civilian was eliminated. The game continues!');
+          } else {
+            alert('本轮淘汰的是平民，游戏继续！');
+          }
         }
         setPhase('voting');
       } else {
