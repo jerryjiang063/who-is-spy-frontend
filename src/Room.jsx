@@ -5,7 +5,7 @@ import Game from './Game';
 import Vote from './Vote';
 import Punishment from './Punishment';
 import QuestionMode from './QuestionMode';
-import { isFigLang, baseURL } from './socket';
+import { isFigLang, baseURL, setPlayerInfo, clearPlayerInfo } from './socket';
 import axios from 'axios';
 import './index.css';
 
@@ -167,6 +167,28 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       alert(message);
     };
 
+    // 添加重连成功处理程序
+    const onRejoinSuccess = ({ room }) => {
+      console.log('Successfully rejoined room:', room);
+      setRoom(room);
+      setRoomId(room.id);
+      
+      // 如果游戏已经开始，但我们没有词语，需要等待服务器重新发送
+      if (room.gameStarted) {
+        setWaitingForGame(true);
+      } else {
+        setPhase('lobby');
+      }
+    };
+    
+    // 添加重连失败处理程序
+    const onRejoinFailed = ({ message }) => {
+      console.error('Failed to rejoin room:', message);
+      alert(message || '重新连接房间失败，请重新加入');
+      setPhase('lobby');
+      clearPlayerInfo();
+    };
+
     socket.on('room-updated', onRoomUpdated);
     socket.on('deal-words', onDealWords);
     socket.on('visibility-updated', onVisibilityUpdated);
@@ -178,6 +200,8 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     socket.on('room-exists', onRoomExists);
     socket.on('kicked-from-room', onKickedFromRoom);
     socket.on('special-wordlist-error', onSpecialWordlistError);
+    socket.on('rejoin-success', onRejoinSuccess);
+    socket.on('rejoin-failed', onRejoinFailed);
     
     if (isFigLang) {
       socket.on('enter-punishment', onEnterPunishment);
@@ -196,6 +220,8 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
       socket.off('room-exists', onRoomExists);
       socket.off('kicked-from-room', onKickedFromRoom);
       socket.off('special-wordlist-error', onSpecialWordlistError);
+      socket.off('rejoin-success', onRejoinSuccess);
+      socket.off('rejoin-failed', onRejoinFailed);
       
       if (isFigLang) {
         socket.off('enter-punishment', onEnterPunishment);
@@ -269,8 +295,17 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
     }
   });
 
-  const createRoom    = ()=>socket.emit('create-room',{ roomId,name });
-  const joinRoom      = ()=>socket.emit('join-room'  ,{ roomId,name });
+  const createRoom = () => {
+    socket.emit('create-room', { roomId, name, listName: wordListName });
+    // 保存玩家信息用于断线重连
+    setPlayerInfo(name, roomId);
+  };
+
+  const joinRoom = () => {
+    socket.emit('join-room', { roomId, name });
+    // 保存玩家信息用于断线重连
+    setPlayerInfo(name, roomId);
+  };
   const changeList    = ln=>{
     console.log(`Changing word list to: ${ln}`);
     
@@ -295,21 +330,16 @@ export default function Room({ socket, title = '《谁是卧底》在线版', de
   };
   
   const leaveRoom = () => {
-    socket.emit('check-room-status', { roomId }, (response) => {
-      if (response.exists) {
-        if (response.status === 'playing') {
-          setWaitingForGame(true);
-          setPhase('waiting');
-        } else {
-          socket.emit('leave-room', { roomId });
-          setPhase('lobby');
-          setRoom({ host:null, listName: defaultWordList, players:[] });
-        }
-      } else {
-        setPhase('lobby');
-        setRoom({ host:null, listName: defaultWordList, players:[] });
-      }
-    });
+    socket.emit('leave-room', { roomId });
+    setPhase('lobby');
+    setRoom({ host: null, listName: defaultWordList, players: [] });
+    setMyWord('');
+    setMyRole('');
+    setVisible(false);
+    setSummary(null);
+    setInPunishment(false);
+    // 清除玩家信息
+    clearPlayerInfo();
   };
   
   const kickPlayer = (playerId) => {

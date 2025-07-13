@@ -147,20 +147,163 @@ console.log('Setting socket URL to:', socketURL);
 const socket = io(socketURL, {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
-  timeout: 10000
+  timeout: 10000,
+  autoConnect: true
 });
+
+// 存储玩家信息，用于断线重连
+let currentPlayerInfo = {
+  name: '',
+  roomId: '',
+  isConnected: false
+};
+
+// 设置当前玩家信息
+export const setPlayerInfo = (name, roomId) => {
+  console.log(`Setting player info: name=${name}, roomId=${roomId}`);
+  currentPlayerInfo.name = name;
+  currentPlayerInfo.roomId = roomId;
+  
+  // 将信息存储在localStorage中，以便页面刷新后恢复
+  localStorage.setItem('whoisspy_player_name', name);
+  localStorage.setItem('whoisspy_room_id', roomId);
+};
+
+// 清除玩家信息
+export const clearPlayerInfo = () => {
+  console.log('Clearing player info');
+  currentPlayerInfo = { name: '', roomId: '', isConnected: false };
+  localStorage.removeItem('whoisspy_player_name');
+  localStorage.removeItem('whoisspy_room_id');
+};
+
+// 尝试从localStorage恢复玩家信息
+const restorePlayerInfo = () => {
+  const name = localStorage.getItem('whoisspy_player_name');
+  const roomId = localStorage.getItem('whoisspy_room_id');
+  
+  if (name && roomId) {
+    console.log(`Restored player info from localStorage: name=${name}, roomId=${roomId}`);
+    currentPlayerInfo.name = name;
+    currentPlayerInfo.roomId = roomId;
+    return true;
+  }
+  return false;
+};
 
 // 添加连接事件监听
 socket.on('connect', () => {
   console.log('Socket connected successfully');
+  currentPlayerInfo.isConnected = true;
+  
+  // 如果有存储的房间信息，尝试重新加入房间
+  if (currentPlayerInfo.name && currentPlayerInfo.roomId) {
+    console.log(`Attempting to rejoin room ${currentPlayerInfo.roomId} as ${currentPlayerInfo.name}`);
+    
+    // 显示重连通知
+    if (document.getElementById('reconnect-notification')) {
+      // 如果已有通知，不重复创建
+      return;
+    }
+    
+    // 创建一个临时通知元素
+    const notification = document.createElement('div');
+    notification.id = 'reconnect-notification';
+    notification.style.position = 'fixed';
+    notification.style.top = '10px';
+    notification.style.left = '50%';
+    notification.style.transform = 'translateX(-50%)';
+    notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '9999';
+    notification.style.fontSize = '14px';
+    notification.textContent = '正在重新连接到房间...';
+    
+    document.body.appendChild(notification);
+    
+    // 发送重连请求
+    socket.emit('rejoin-room', {
+      playerName: currentPlayerInfo.name,
+      roomId: currentPlayerInfo.roomId
+    });
+    
+    // 5秒后自动移除通知
+    setTimeout(() => {
+      if (document.getElementById('reconnect-notification')) {
+        document.body.removeChild(notification);
+      }
+    }, 5000);
+  } else {
+    // 尝试从localStorage恢复
+    if (restorePlayerInfo()) {
+      console.log(`Attempting to rejoin room ${currentPlayerInfo.roomId} as ${currentPlayerInfo.name} (restored from localStorage)`);
+      
+      // 显示重连通知
+      const notification = document.createElement('div');
+      notification.id = 'reconnect-notification';
+      notification.style.position = 'fixed';
+      notification.style.top = '10px';
+      notification.style.left = '50%';
+      notification.style.transform = 'translateX(-50%)';
+      notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      notification.style.color = 'white';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '5px';
+      notification.style.zIndex = '9999';
+      notification.style.fontSize = '14px';
+      notification.textContent = '正在重新连接到房间...';
+      
+      document.body.appendChild(notification);
+      
+      socket.emit('rejoin-room', {
+        playerName: currentPlayerInfo.name,
+        roomId: currentPlayerInfo.roomId
+      });
+      
+      // 5秒后自动移除通知
+      setTimeout(() => {
+        if (document.getElementById('reconnect-notification')) {
+          document.body.removeChild(notification);
+        }
+      }, 5000);
+    }
+  }
 });
 
 socket.on('connect_error', (error) => {
   console.error('Socket connection error:', error);
+  currentPlayerInfo.isConnected = false;
 });
 
 socket.on('disconnect', (reason) => {
   console.log('Socket disconnected:', reason);
+  currentPlayerInfo.isConnected = false;
+});
+
+// 重连成功或失败的处理
+socket.on('rejoin-success', ({ room }) => {
+  console.log('Successfully rejoined room:', room);
+  
+  // 移除重连通知
+  const notification = document.getElementById('reconnect-notification');
+  if (notification) {
+    document.body.removeChild(notification);
+  }
+});
+
+socket.on('rejoin-failed', ({ message }) => {
+  console.error('Failed to rejoin room:', message);
+  
+  // 移除重连通知
+  const notification = document.getElementById('reconnect-notification');
+  if (notification) {
+    document.body.removeChild(notification);
+  }
+  
+  // 清除无效的房间信息
+  clearPlayerInfo();
 });
 
 export default socket;
