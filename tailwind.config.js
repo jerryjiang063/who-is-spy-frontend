@@ -21,15 +21,20 @@ export default {
           900: '#0c4a6e',
         },
         background: {
-          light: '#ffffff',
-          dark: '#1a1a1a',
+          light: '#F1F4F8',
+          dark: '#1e293b',
         },
+        text: {
+          light: '#1976d2',
+          dark: '#90caf9',
+        }
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
         'scale': 'scale 0.2s ease-in-out',
+        'theme-transition': 'themeTransition 0.5s ease',
       },
       keyframes: {
         fadeIn: {
@@ -48,10 +53,18 @@ export default {
           '0%': { transform: 'scale(0.95)' },
           '100%': { transform: 'scale(1)' },
         },
+        themeTransition: {
+          '0%': { opacity: '0.8' },
+          '100%': { opacity: '1' },
+        },
+      },
+      transitionProperty: {
+        'theme': 'color, background-color, border-color, text-decoration-color, fill, stroke',
+      },
+      transitionDuration: {
+        '500': '500ms',
       },
     },
   },
-  plugins: [
-    require('tailwindcss-animate'),
-  ],
+  plugins: [],
 } 

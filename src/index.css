@@ -12,6 +12,16 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: color 0.5s ease, background-color 0.5s ease;
+}
+
+.dark {
+  color: #90caf9; /* 浅蓝色 */
+  background-color: #1e293b; /* 深蓝灰色，不是纯黑 */
+}
+
+html {
+  transition: color 0.5s ease, background-color 0.5s ease;
 }
 
 body {
@@ -22,6 +32,11 @@ body {
   align-items: center;
   justify-content: center;
   background: #F1F4F8;
+  transition: background-color 0.5s ease;
+}
+
+.dark body {
+  background: #1e293b;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -30,16 +45,30 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   margin: 0.5em 0;
   letter-spacing: 0.02em;
+  transition: color 0.5s ease;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #90caf9;
 }
 
 a {
   font-weight: 700;
   color: #1976d2;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.5s ease;
 }
+
+.dark a {
+  color: #90caf9;
+}
+
 a:hover {
   color: #0d47a1;
+}
+
+.dark a:hover {
+  color: #bbdefb;
 }
 
 .card-center {
@@ -54,6 +83,12 @@ a:hover {
   align-items: center;
   backdrop-filter: blur(24px);
   animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+  transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.dark .card-center {
+  background: rgba(30, 41, 59, 0.85);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.3);
 }
 
 input, select {
@@ -67,13 +102,25 @@ input, select {
   color: #1976d2;
   outline: none;
   box-shadow: 0 2px 12px 0 rgba(33,150,243,0.08);
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: border 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease, color 0.5s ease;
   width: 100%;
   max-width: 420px;
 }
+
+.dark input, .dark select {
+  background: rgba(30, 41, 59, 0.8);
+  color: #90caf9;
+  border: 2px solid #334155;
+}
+
 input:focus, select:focus {
   border: 2.5px solid #1976d2;
   box-shadow: 0 4px 24px 0 rgba(33,150,243,0.16);
+}
+
+.dark input:focus, .dark select:focus {
+  border: 2.5px solid #90caf9;
+  box-shadow: 0 4px 24px 0 rgba(144, 202, 249, 0.2);
 }
 
 button {
@@ -88,17 +135,32 @@ button {
   cursor: pointer;
   margin: 1rem 0;
   box-shadow: 0 8px 32px 0 rgba(33,150,243,0.16);
-  transition: border 0.2s, box-shadow 0.2s, transform 0.15s;
+  transition: border 0.5s ease, box-shadow 0.5s ease, transform 0.15s ease, background-color 0.5s ease, color 0.5s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1.2rem;
 }
+
+.dark button {
+  background: rgba(30, 41, 59, 0.95);
+  color: #90caf9;
+  border: 2px solid #334155;
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.3);
+}
+
 button:hover, button:focus {
   border: 2.5px solid #1976d2;
   box-shadow: 0 12px 48px 0 rgba(33,150,243,0.22);
   transform: scale(1.04);
   background: #e3f2fd;
+}
+
+.dark button:hover, .dark button:focus {
+  border: 2.5px solid #90caf9;
+  box-shadow: 0 12px 48px 0 rgba(144, 202, 249, 0.2);
+  transform: scale(1.04);
+  background: #334155;
 }
 
 @keyframes fadeIn {
@@ -119,4 +181,11 @@ button:hover, button:focus {
     font-size: 1.2rem;
     padding: 0.7rem 1.2rem;
   }
+}
+
+/* 主题切换过渡动画 */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
 }
