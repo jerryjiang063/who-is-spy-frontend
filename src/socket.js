@@ -6,18 +6,15 @@ import axios from 'axios';
 // 在本地开发环境中也启用 figurativelanguage 功能
 export const isFigLang = window.location.hostname.includes('figurativelanguage') || window.location.hostname === 'localhost';
 
-// 获取当前完整域名
-const currentOrigin = window.location.origin;
-console.log('Current origin:', currentOrigin);
-
-// 使用 HTML 中预先设置的 API_BASE_URL，如果不存在则使用当前设置逻辑
-const API_BASE_URL = window.API_BASE_URL || 
-  ((window.location.hostname !== 'localhost') 
-    ? currentOrigin  // 使用当前域名
-    : 'http://localhost:3001');
+// 使用环境变量 VITE_API_BASE，如果不存在则根据环境选择
+// 生产环境使用 https://api.spyccb.top，开发环境使用 localhost:3001
+const API_BASE_URL = import.meta.env.VITE_API_BASE || 
+  (window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001'
+    : 'https://api.spyccb.top');
 
 console.log('Socket.js - Current hostname:', window.location.hostname);
-console.log('Socket.js - Environment:', process.env.NODE_ENV);
+console.log('Socket.js - Environment:', import.meta.env.MODE);
 console.log('Socket.js - Setting API base URL to:', API_BASE_URL);
 
 // 导出 baseURL 供其他组件使用
@@ -130,16 +127,12 @@ axiosWithRetry.interceptors.request.use(request => {
 });
 
 // 创建 socket 连接
-let socketURL;
-
-// 本地开发环境
-if (window.location.hostname === 'localhost') {
-  socketURL = 'http://localhost:3001';
-} 
-// 生产环境
-else {
-  socketURL = window.location.origin;  // 使用当前域名
-}
+// 使用环境变量 VITE_API_BASE，如果不存在则根据环境选择
+// 生产环境使用 https://api.spyccb.top，开发环境使用 localhost:3001
+const socketURL = import.meta.env.VITE_API_BASE || 
+  (window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001'
+    : 'https://api.spyccb.top');
 
 console.log('Setting socket URL to:', socketURL);
 

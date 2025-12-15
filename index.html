@@ -8,9 +8,10 @@
     <!-- Force correct API URL -->
     <script>
       // Store the correct API URL as a global variable before any React code loads
+      // Production uses https://api.spyccb.top, development uses localhost:3001
       window.API_BASE_URL = window.location.hostname === 'localhost' 
         ? 'http://localhost:3001' 
-        : window.location.origin;
+        : 'https://api.spyccb.top';
       
       console.log('HTML Script - Setting API Base URL:', window.API_BASE_URL);
       
@@ -19,7 +20,7 @@
       window.fetch = function(url, options) {
         if (window.location.hostname !== 'localhost' && url.includes('localhost:3001')) {
           console.warn('Intercepted localhost fetch call:', url);
-          url = url.replace('http://localhost:3001', window.location.origin);
+          url = url.replace('http://localhost:3001', 'https://api.spyccb.top');
           console.log('Redirected to:', url);
         }
         return originalFetch.call(this, url, options);

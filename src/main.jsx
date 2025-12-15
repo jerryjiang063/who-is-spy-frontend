@@ -6,11 +6,13 @@ import axios from 'axios'
 
 // 强制设置 API URL，确保在应用启动前配置
 const configureAPI = () => {
-  // 使用全局设置的 API_BASE_URL 或回退到当前域名
-  const apiBaseUrl = window.API_BASE_URL || 
+  // 优先使用环境变量 VITE_API_BASE，然后使用 window.API_BASE_URL，最后根据环境选择
+  // 生产环境使用 https://api.spyccb.top，开发环境使用 localhost:3001
+  const apiBaseUrl = import.meta.env.VITE_API_BASE || 
+    window.API_BASE_URL ||
     (window.location.hostname === 'localhost' 
       ? 'http://localhost:3001' 
-      : window.location.origin);
+      : 'https://api.spyccb.top');
   
   console.log('main.jsx - Setting API URL to:', apiBaseUrl);
   
